@@ -6,7 +6,8 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.7"
-
+bevy_asset_loader = "0.10"
+smooth-bevy-cameras = "0.4"
 
 [profile.dev]
 opt-level = 1
