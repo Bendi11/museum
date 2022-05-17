@@ -8,6 +8,7 @@ edition = "2021"
 bevy = "0.7"
 bevy_asset_loader = "0.10"
 smooth-bevy-cameras = "0.4"
+impacted = "1.4"
 
 [profile.dev]
 opt-level = 1

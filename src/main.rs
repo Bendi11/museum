@@ -1,6 +1,6 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 
-use bevy::{prelude::*, input::{mouse::MouseMotion, keyboard::KeyboardInput, ElementState}};
+use bevy::{prelude::{*, shape::Quad}, input::{mouse::MouseMotion, keyboard::KeyboardInput, ElementState}, render::mesh::{PrimitiveTopology, Indices}};
 use bevy_asset_loader::{AssetLoader, AssetCollection};
 use smooth_bevy_cameras::{LookAngles, LookTransform, LookTransformBundle, LookTransformPlugin, Smoother};
 
@@ -30,7 +30,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     textures: Res<Textures>,
 ) {
-    windows.iter_mut().for_each(|window| {
+    windows.get_primary_mut().map(|window| {
         window.set_cursor_lock_mode(true);
         window.set_cursor_visibility(false);
     });
@@ -38,13 +38,24 @@ fn setup(
     // plane
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Plane { size: 5.0 })),
-        material: materials.add(textures.floor.clone().into()),//Color::rgb(0.3, 0.5, 0.3).into()),
+        material: materials.add(StandardMaterial {
+                base_color_texture: Some(textures.floor.clone()),
+                metallic: 0.,
+                perceptual_roughness: 0.9,
+                ..Default::default()
+        }),
         ..default()
     });
     // cube
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+        material: materials.add({
+            let mut material = StandardMaterial::from(Color::rgb(0.8, 0.7, 0.6));
+            material.metallic = 0.2;
+            material.perceptual_roughness = 0.5;
+            material.reflectance = 0.9;
+            material
+        }),
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
         ..default()
     });
@@ -127,11 +138,14 @@ fn input(
 
 }
 
+const PLAYER_RADIUS: f32 = 0.1;
+
 #[derive(Component)]
 struct Player;
 
 #[derive(Component)]
 struct MouseGrabbed(bool);
+
 
 /// Current scene state
 #[derive(Clone, Copy, Hash, Debug, PartialEq, Eq)]
@@ -143,5 +157,5 @@ pub enum State {
 #[derive(AssetCollection)]
 struct Textures {
     #[asset(path="floor.png")]
-    floor: Handle<Image>
+    floor: Handle<Image>,
 }
