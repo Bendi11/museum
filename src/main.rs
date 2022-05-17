@@ -58,19 +58,18 @@ fn setup(
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..default()
     });
-    commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(1., 0.25, 1.),
-        ..default()
-    });
-    /*commands.spawn_bundle(LookTransformBundle {
+    commands.spawn_bundle(LookTransformBundle {
         transform: LookTransform {
             eye: Vec3::new(1., 0.25, 1.),
             target: Vec3::X
         },
         smoother: Smoother::new(0.7),
     })
-    .insert_bundle(PerspectiveCameraBundle::default())
-    .insert(Player);*/
+        .insert_bundle(PerspectiveCameraBundle {
+            perspective_projection: PerspectiveProjection { fov: 1.5708, ..Default::default() },
+            ..default()
+        })
+        .insert(Player);
 }
 
 fn kb_events(
