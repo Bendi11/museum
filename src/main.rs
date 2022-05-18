@@ -1,6 +1,6 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 
-use bevy::{prelude::{*, shape::Quad}, input::{mouse::{MouseMotion, MouseButtonInput}, keyboard::KeyboardInput, ElementState}, render::mesh::{PrimitiveTopology, Indices}, window::WindowMode};
+use bevy::{prelude::{*, shape::Quad}, input::{mouse::{MouseMotion, MouseButtonInput}, keyboard::KeyboardInput, ElementState}, render::{mesh::{PrimitiveTopology, Indices}, render_resource::Face}, window::WindowMode};
 use bevy_asset_loader::{AssetLoader, AssetCollection};
 use smooth_bevy_cameras::{LookAngles, LookTransform, LookTransformBundle, LookTransformPlugin, Smoother};
 use impacted::CollisionShape;
@@ -60,7 +60,7 @@ fn setup(
         }),
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
         ..default()
-    });
+    }).insert(CollisionShape::new_rectangle(1., 1.));
     // light
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
@@ -79,9 +79,10 @@ fn setup(
         smoother: Smoother::new(0.7),
     })
         .insert_bundle(PerspectiveCameraBundle {
-            perspective_projection: PerspectiveProjection { fov: 1.5708, ..Default::default() },
+            perspective_projection: PerspectiveProjection { fov: 1.22173, ..Default::default() },
             ..default()
         })
+        .insert(CollisionShape::new_circle(PLAYER_RADIUS))
         .insert(Player);
 }
 
@@ -89,11 +90,12 @@ fn input(
     mut mouse: EventReader<MouseMotion>,
     mut mb: EventReader<MouseButtonInput>,
     kb: Res<Input<KeyCode>>,
-    mut cameras: Query<&mut LookTransform>,
+    mut players: Query<(&mut LookTransform, &CollisionShape), With<Player>>,
     mut windows: ResMut<Windows>,
+    objects: Query<&CollisionShape, Without<Player>>,
 ) {
     const SENSITIVITY: f32 = 0.01;
-    for mut camera in cameras.iter_mut() {
+    for (mut camera, shape) in players.iter_mut() {
         let mut angles = LookAngles::from_vector(camera.look_direction().unwrap_or_default());
         for event in mouse.iter() {
             angles.add_pitch(-event.delta.y * SENSITIVITY);
@@ -105,23 +107,28 @@ fn input(
         let rot_x = yaw_rot * Vec3::X;
         let rot_y = yaw_rot * Vec3::Y;
         let rot_z = yaw_rot * Vec3::Z;
-    
+
+            
         const MOVESPEED: f32 = 0.02;
         let mut movement = Vec3::default();
         if kb.pressed(KeyCode::W) {
-            movement.z += MOVESPEED 
-        }
-        if kb.pressed(KeyCode::A) {
-            movement.x += MOVESPEED;
-        }
-        if kb.pressed(KeyCode::S) {
+            movement.z += MOVESPEED;
+        } else if kb.pressed(KeyCode::S) {
             movement.z -= MOVESPEED;
         }
+
         if kb.pressed(KeyCode::D) {
             movement.x -= MOVESPEED;
+        } else if kb.pressed(KeyCode::A) {
+            movement.x += MOVESPEED;
         }
-
+        
         camera.eye += movement.x * rot_x + movement.y * rot_y + movement.z * rot_z;
+        let moved = shape.clone().with_transform(impacted::Transform::from_translation([camera.eye.x, camera.eye.z]));
+        for collision in objects.iter().filter_map(|obj| moved.contact_with(obj)) {
+            camera.eye.x += collision.normal[0] * collision.penetration;
+            camera.eye.z += collision.normal[1] * collision.penetration;
+        }
         camera.target = camera.eye + camera.radius() * angles.unit_vector();
     }
 
@@ -136,10 +143,13 @@ fn input(
 
 }
 
-const PLAYER_RADIUS: f32 = 0.1;
+const PLAYER_RADIUS: f32 = 0.16;
 
 #[derive(Component)]
 struct Player;
+
+#[derive(Component)]
+struct StaticGeom;
 
 #[derive(Component)]
 struct MouseGrabbed(bool);
@@ -157,8 +167,12 @@ struct Textures {
     floor: Handle<Image>,
 }
 
-fn update_transforms(mut shapes: Query<(&mut CollisionShape, &GlobalTransform), Changed<GlobalTransform>>) {
+fn update_transforms(mut shapes: Query<(&mut CollisionShape, &GlobalTransform), (Changed<GlobalTransform>, Without<StaticGeom>)>) {
     for (mut shape, transform) in shapes.iter_mut() {
-        shape.set_transform(*transform);
+        shape.set_transform(impacted::Transform::from_scale_angle_translation(
+            [transform.scale.x, transform.scale.z],
+            transform.rotation.to_axis_angle().1,
+            [transform.translation.x, transform.translation.z]
+        ));
     }
 }
