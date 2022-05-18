@@ -1,8 +1,9 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 
-use bevy::{prelude::{*, shape::Quad}, input::{mouse::MouseMotion, keyboard::KeyboardInput, ElementState}, render::mesh::{PrimitiveTopology, Indices}};
+use bevy::{prelude::{*, shape::Quad}, input::{mouse::{MouseMotion, MouseButtonInput}, keyboard::KeyboardInput, ElementState}, render::mesh::{PrimitiveTopology, Indices}, window::WindowMode};
 use bevy_asset_loader::{AssetLoader, AssetCollection};
 use smooth_bevy_cameras::{LookAngles, LookTransform, LookTransformBundle, LookTransformPlugin, Smoother};
+use impacted::CollisionShape;
 
 fn main() {
     let mut app = App::new();
@@ -15,10 +16,10 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(LookTransformPlugin)
         .insert_resource(MouseGrabbed(true))
+        .add_system_to_stage(CoreStage::PostUpdate, update_transforms)
         .add_system_set(SystemSet::on_enter(State::Main).with_system(setup))
         .add_system_set(SystemSet::on_update(State::Main)
-            .with_system(input.before(kb_events))
-            .with_system(kb_events)
+            .with_system(input)
         )
         .run();
 }
@@ -31,6 +32,7 @@ fn setup(
     textures: Res<Textures>,
 ) {
     windows.get_primary_mut().map(|window| {
+        window.set_resizable(true);
         window.set_cursor_lock_mode(true);
         window.set_cursor_visibility(false);
     });
@@ -83,25 +85,12 @@ fn setup(
         .insert(Player);
 }
 
-fn kb_events(
-    mut events: EventReader<KeyboardInput>,
-    mut windows: ResMut<Windows>,
-    mut grabbed: ResMut<MouseGrabbed>,
-) {
-    for event in events.iter() {
-        if event.state == ElementState::Released && event.key_code == Some(KeyCode::Escape) {
-            grabbed.0 = !grabbed.0;
-            let window = windows.primary_mut();
-            window.set_cursor_lock_mode(grabbed.0);
-            window.set_cursor_visibility(!grabbed.0);
-        } 
-    }
-}
-
 fn input(
     mut mouse: EventReader<MouseMotion>,
+    mut mb: EventReader<MouseButtonInput>,
     kb: Res<Input<KeyCode>>,
     mut cameras: Query<&mut LookTransform>,
+    mut windows: ResMut<Windows>,
 ) {
     const SENSITIVITY: f32 = 0.01;
     for mut camera in cameras.iter_mut() {
@@ -136,6 +125,15 @@ fn input(
         camera.target = camera.eye + camera.radius() * angles.unit_vector();
     }
 
+    for event in mb.iter() {
+        if event.button == MouseButton::Left && event.state == ElementState::Released {
+            windows.get_primary_mut().map(|window| {
+                window.set_cursor_lock_mode(true);
+                window.set_cursor_visibility(false);
+            }); 
+        }
+    }
+
 }
 
 const PLAYER_RADIUS: f32 = 0.1;
@@ -145,7 +143,6 @@ struct Player;
 
 #[derive(Component)]
 struct MouseGrabbed(bool);
-
 
 /// Current scene state
 #[derive(Clone, Copy, Hash, Debug, PartialEq, Eq)]
@@ -158,4 +155,10 @@ pub enum State {
 struct Textures {
     #[asset(path="floor.png")]
     floor: Handle<Image>,
+}
+
+fn update_transforms(mut shapes: Query<(&mut CollisionShape, &GlobalTransform), Changed<GlobalTransform>>) {
+    for (mut shape, transform) in shapes.iter_mut() {
+        shape.set_transform(*transform);
+    }
 }

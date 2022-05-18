@@ -1647,6 +1647,8 @@ version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eb08eec8f2e464be20cd25d9d731d74b375cebfb5fd1ec48621458c6d84b0e01"
 dependencies = [
+ "bevy_ecs",
+ "bevy_transform",
  "glam",
  "rustc_version 0.4.0",
  "smallvec",
