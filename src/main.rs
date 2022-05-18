@@ -163,7 +163,10 @@ fn input(
         
         camera.eye += movement.x * rot_x + movement.y * rot_y + movement.z * rot_z;
         let moved = shape.clone().with_transform(impacted::Transform::from_translation([camera.eye.x, camera.eye.z]));
-        for collision in objects.iter().filter_map(|obj| moved.contact_with(obj)) {
+        for collision in objects.iter()
+            .filter(|obj| obj.is_collided_with(&moved))
+            .filter_map(|obj| moved.contact_with(obj)
+        ) {
             camera.eye.x += collision.normal[0] * collision.penetration;
             camera.eye.z += collision.normal[1] * collision.penetration;
         }
