@@ -53,149 +53,120 @@ fn setup(
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
 
     let a = (0., 0.);
-    let b = (0., -2.);
-    let c = (-3., -2.);
-    let d = (-3., 0.);
-    let e = (-3., -0.5);
-    let f = (-3., -1.5);
-    let g = (-9., 0.);
-    let h = (-9., -3.);
-    let i = (-3., -3.);
-    let j = (-8., -3.);
-    let k = (-4., -3.);
-    let l = (-2., -3.);
-    let m = (-10., -3.);
-    let n = (1., -3.);
-    let o = (-13., -3.);
-    let p = (-10., -5.);
-    let q = (-2., -5.);
-    let r = (-10., -7.);
-    let s = (-2., -7.);
-    let t = (-10., -8.);
-    let u = (-2., -8.);
-    let v = (-10., -10.);
-    let w = (-2., -10.);
-    let x = (-10., -11.);
-    let y = (-2., -11.);
-    let z = (-8., -11.);
-    let aa = (-4., -11.);
-    let ab = (-13., -11.);
-    let ac = (1., -11.);
-
-    let tall = 1.2;
+    let b = (4., 0.);
+    let c = (7., 0.);
+    let d = (4., 0.5);
+    let e = (4., 2.5);
+    let f = (0., 3.);
+    let g = (0.5, 3.);
+    let h = (3.5, 3.);
+    let i = (4., 3.);
+    let j = (6.5, 3.);
+    let k = (7., 3.);
+    let l = (7.5, 3.);
+    let m = (10.5, 3.);
+    let n = (3.5, 3.5);
+    let o = (7.5, 3.5);
+    let p = (3.5, 4.5);
+    let q = (7.5, 4.5);
+    let r = (3.5, 6.5);
+    let s = (7.5, 6.5);
+    let t = (3.5, 8.5);
+    let u = (7.5, 8.5);
+    let v = (3.5, 10.5);
+    let w = (7.5, 10.5);
+    let x = (3.5, 11.);
+    let y = (7.5, 11.);
+    let z = (0.5, 12.);
+    let aa = (3.5, 12.);
+    let ab = (4.5, 12.);
+    let ac = (6.5, 12.);
+    let ad = (7.5, 12.);
+    let ae = (10.5, 12.);
+    let af = (0.5, 12.5);
+    let ag = (3.5, 12.5);
+    let ah = (7.5, 12.5);
+    let ai = (10.5, 12.5);
+    let aj = (3.5, 14.);
+    let ak = (7.5, 14.);
+    let al = (0.5, 15.5);
+    let am = (3.5, 15.5);
+    let an = (4., 15.5);
+    let ao = (7., 15.5);
+    let ap = (7.5, 15.5);
+    let aq = (10.5, 15.5);
+    let ar = (8., 16.5);
+    let r#as = (11.5, 16.5);
+    let at = (15.5, 16.5);
+    let au = (9.5, 18.);
+    let av = (11.5, 18.);
+    let aw = (13.5, 18.);
+    let ax = (16.5, 18.5);
+    let ay = (8., 19.5);
+    let az = (9.5, 19.5);
+    let ba = (11.5, 19.5);
+    let bb = (13.5, 19.5);
+    let bc = (14.5, 19.5);
+    let bd = (11.5, 22.5);
+    let be = (16.5, 22.5);
+    let bf = (4.5, 3.);
 
     SceneBuilder::new()
-        .with_wall(
-            wall(a, g)
-                .with_texture(textures.blue_trimmed_wall.clone())
-                .with_height(tall)
-                .autotile_len(),
-        )
-        .with_wall(
-            wall(a, b)
-                .with_texture(textures.blue_trimmed_wall.clone())
-                .autotile_len(),
-        )
-        .with_wall(
-            wall(b, c)
-                .with_texture(textures.blue_trimmed_wall.clone())
-                .autotile_len(),
-        )
-        .with_wall(
-            wall(d, e)
-                .with_height(tall)
-                .with_texture(textures.blue_trimmed_wall.clone())
-                .autotile_len(),
-        )
-        .with_wall(
-            wall(e, f)
-                .with_height(0.2)
-                .with_offset(tall - 0.2)
-                .with_collision(false)
-                .with_texture(textures.blue_trimmed_wall.clone()),
-        )
-        .with_wall(wall(g, h).with_height(tall))
-        .with_wall(
-            wall(i, f)
-                .with_height(1.2)
-                .with_texture(textures.blue_trimmed_wall.clone())
-                .with_height(1.2)
-                .autotile_len(),
-        )
-        .with_wall(wall(j, o).with_height(tall))
-        .with_wall(wall(k, n).with_height(tall))
-        
-        .with_wall(wall(m, p).with_height(tall).with_texture(textures.limestone_wall.clone()).autotile_len())
-        .with_wall(wall(l, q).with_height(tall).with_texture(textures.limestone_wall.clone()).autotile_len())
+        .with_wall(wall(a, f))
+        .with_wall(wall(a, c))
+        .with_wall(wall(b, d))
+        .with_wall(wall(c, k))
+        .with_wall(wall(e, i))
+        .with_wall(wall(f, bf))
+        .with_wall(wall(g, z))
+        .with_wall(wall(h, p))
+        .with_wall(wall(i, n))
+        .with_wall(wall(j, m))
+        .with_wall(wall(k, o))
+        .with_wall(wall(l, q))
+        .with_wall(wall(m, ae))
+        .with_wall(wall(r, t))
+        .with_wall(wall(s, u))
+        .with_wall(wall(v, aa))
+        .with_wall(wall(w, ad))
+        .with_wall(wall(x, ab))
+        .with_wall(wall(y, ac))
+        .with_wall(wall(z, ab))
+        .with_wall(wall(aa, ag))
+        .with_wall(wall(ad, ah))
+        .with_wall(wall(af, ag))
+        .with_wall(wall(af, al))
+        .with_wall(wall(ah, ai))
+        .with_wall(wall(ai, aq))
+        .with_wall(wall(aj, am))
+        .with_wall(wall(ak, ap))
+        .with_wall(wall(al, an))
+        .with_wall(wall(an, ay))
+        .with_wall(wall(ao, aq))
+        .with_wall(wall(ao, ar))
+        .with_wall(wall(ar, at))
+        .with_wall(wall(r#as, av))
+        .with_wall(wall(at, ax))
+        .with_wall(wall(au, az))
+        .with_wall(wall(aw, bb))
+        .with_wall(wall(ax, be))
+        .with_wall(wall(ay, bc))
+        .with_wall(wall(ba, bd))
+        .with_wall(wall(bd, bc))
 
-        .with_wall(wall(r, t).with_height(tall).with_texture(textures.limestone_wall.clone()))
-        .with_wall(wall(s, u).with_height(tall).with_texture(textures.limestone_wall.clone()))
-
-        .with_wall(wall(v, x).with_height(tall).with_texture(textures.limestone_wall.clone()))
-        .with_wall(wall(w, y).with_height(tall).with_texture(textures.limestone_wall.clone()))
-
-        .with_wall(wall(z, ab).with_height(tall))
-        .with_wall(wall(aa, ac).with_height(tall))
-
-        .with_wall(wall(n, ac).with_height(tall))
-        .with_wall(wall(o, ab).with_height(tall))
-        
-
-        .with_floor(
-            FloorBuilder::new(m, y)
-                .with_texture(textures.flagstone_floor.clone())
-                .with_offset(0.0001)
-                .autotile()
-        )
-        .with_floor(
-            FloorBuilder::new(o, ac)
-                .with_texture(textures.birch_floor.clone())
-                .autotile()
-        )
-
-        .with_floor(
-            FloorBuilder::new(a, h)
-                .with_texture(textures.birch_floor.clone())
-                .autotile(),
-        )
-
-
-        .with_floor(
-            FloorBuilder::new(a, c)
-                .with_offset(1.)
-                .with_texture(textures.ceiling_panel.clone())
-                .autotile(),
-        )
-        .with_floor(
-            FloorBuilder::new(d, h)
-                .with_offset(tall)
-                .with_texture(textures.ceiling_panel.clone())
-                .autotile(),
-        )
-        .with_floor(
-            FloorBuilder::new(l, ac)
-                .with_offset(tall)
-                .autotile()
-        )
-        .with_floor(
-            FloorBuilder::new(o, x)
-                .with_offset(tall)
-                .autotile()
-        )
-
-        
         .with_floor(
             FloorBuilder::new((100., 100.), (-100., -100.))
                 .with_offset(10.)
                 .with_texture(textures.sky.clone())
         )
         .finish(&mut commands, &mut meshes, &mut materials);
-
+    
+    //Spawn the player
     commands
         .spawn_bundle(LookTransformBundle {
             transform: LookTransform {
-                eye: Vec3::new(-1.5, 0.4, -1.),
-                target: Vec3::new(-1.5, 0.3, -2.),
+                eye: Vec3::new(2., 1.7, 1.5),
+                target: Vec3::new(-2., 1.7, 1.5),
             },
             smoother: Smoother::new(0.7),
         })
@@ -221,16 +192,15 @@ fn input(
     for mut camera in players.iter_mut() {
         if let Some(dir) = camera.look_direction() {
             let mut angles = LookAngles::from_vector(dir);
-            for event in mouse.iter() {
-                angles.add_pitch(-event.delta.y * SENSITIVITY);
-                angles.add_yaw(-event.delta.x * SENSITIVITY);
-            }
-
-            camera.target = camera.eye + 1. * camera.radius() * angles.unit_vector();
             let yaw_rot = Quat::from_axis_angle(Vec3::Y, angles.get_yaw());
             let rot_x = yaw_rot * Vec3::X;
             let rot_y = yaw_rot * Vec3::Y;
             let rot_z = yaw_rot * Vec3::Z;
+
+            for event in mouse.iter() {
+                angles.add_pitch(-event.delta.y * SENSITIVITY);
+                angles.add_yaw(-event.delta.x * SENSITIVITY);
+            }
 
             const MOVESPEED: f32 = 0.02;
             let mut movement = Vec2::default();
@@ -275,6 +245,7 @@ fn input(
             pos.x = pos2d.x;
             pos.z = pos2d.y;
             
+            angles.assert_not_looking_up();
             camera.eye = pos;
             camera.target = camera.eye + camera.radius() * angles.unit_vector();
         }
@@ -306,13 +277,6 @@ pub struct LineCollider {
     to: Vec2,
     /// Cached length of the collider
     len: f32,
-}
-
-/// Current scene state
-#[derive(Clone, Copy, Hash, Debug, PartialEq, Eq)]
-pub enum State {
-    Loading,
-    Main,
 }
 
 /// Structure for constructing the map
@@ -510,7 +474,7 @@ impl WallBuilder {
         Self {
             collision: true,
             h_off: 0.,
-            height: 1.,
+            height: 3.7,
             texture: None,
             color: Color::rgb(color, color, color),
             from,
