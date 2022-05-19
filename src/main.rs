@@ -53,93 +53,151 @@ fn setup(
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
 
     let a = (0., 0.);
-    let b = (4., 0.);
-    let c = (7., 0.);
-    let d = (4., 0.5);
-    let e = (4., 2.5);
-    let f = (0., 3.);
-    let g = (0.5, 3.);
-    let h = (3.5, 3.);
-    let i = (4., 3.);
-    let j = (6.5, 3.);
-    let k = (7., 3.);
-    let l = (7.5, 3.);
-    let m = (10.5, 3.);
-    let n = (3.5, 3.5);
-    let o = (7.5, 3.5);
-    let p = (3.5, 4.5);
-    let q = (7.5, 4.5);
-    let r = (3.5, 6.5);
-    let s = (7.5, 6.5);
-    let t = (3.5, 8.5);
-    let u = (7.5, 8.5);
-    let v = (3.5, 10.5);
-    let w = (7.5, 10.5);
-    let x = (3.5, 11.);
-    let y = (7.5, 11.);
-    let z = (0.5, 12.);
-    let aa = (3.5, 12.);
-    let ab = (4.5, 12.);
-    let ac = (6.5, 12.);
-    let ad = (7.5, 12.);
-    let ae = (10.5, 12.);
-    let af = (0.5, 12.5);
-    let ag = (3.5, 12.5);
-    let ah = (7.5, 12.5);
-    let ai = (10.5, 12.5);
-    let aj = (3.5, 14.);
-    let ak = (7.5, 14.);
-    let al = (0.5, 15.5);
-    let am = (3.5, 15.5);
-    let an = (4., 15.5);
-    let ao = (7., 15.5);
-    let ap = (7.5, 15.5);
-    let aq = (10.5, 15.5);
-    let ar = (8., 16.5);
-    let r#as = (11.5, 16.5);
-    let at = (15.5, 16.5);
-    let au = (9.5, 18.);
-    let av = (11.5, 18.);
-    let aw = (13.5, 18.);
-    let ax = (16.5, 18.5);
-    let ay = (8., 19.5);
-    let az = (9.5, 19.5);
-    let ba = (11.5, 19.5);
-    let bb = (13.5, 19.5);
-    let bc = (14.5, 19.5);
-    let bd = (11.5, 22.5);
-    let be = (16.5, 22.5);
-    let bf = (4.5, 3.);
+    let b = (8., 0.);
+    let c = (14., 0.);
+    let d = (8., 1.);
+    let e = (8., 5.);
+    let f = (0., 6.);
+    let g = (1., 6.);
+    let h = (7., 6.);
+    let i = (8., 6.);
+    let j = (13., 6.);
+    let k = (14., 6.);
+    let l = (15., 6.);
+    let m = (21., 6.);
+    let n = (7., 7.);
+    let o = (15., 7.);
+    let p = (7., 9.);
+    let q = (15., 9.);
+    let r = (7., 13.);
+    let s = (15., 13.);
+    let t = (7., 17.);
+    let u = (15., 17.);
+    let v = (7., 21.);
+    let w = (15., 21.);
+    let x = (7., 22.);
+    let y = (15., 22.);
+    let z = (1., 24.);
+    let aa = (7., 24.);
+    let ab = (9., 24.);
+    let ac = (13., 24.);
+    let ad = (15., 24.);
+    let ae = (21., 24.);
+    let af = (1., 25.);
+    let ag = (7., 25.);
+    let ah = (15., 25.);
+    let ai = (21., 25.);
+    let aj = (7., 28.);
+    let ak = (15., 28.);
+    let al = (1., 31.);
+    let am = (7., 31.);
+    let an = (8., 31.);
+    let ao = (14., 31.);
+    let ap = (15., 31.);
+    let aq = (21., 31.);
+    let ar = (16., 33.);
+    let r#as = (23., 33.);
+    let at = (31., 33.);
+    let au = (19., 36.);
+    let av = (23., 36.);
+    let aw = (27., 36.);
+    let ax = (33., 37.);
+    let ay = (16., 39.);
+    let az = (19., 39.);
+    let ba = (23., 39.);
+    let bb = (27., 39.);
+    let bc = (29., 39.);
+    let bd = (23., 45.);
+    let be = (33., 45.);
+    let bf = (9., 6.);
+    let bg = (7.5, 13.);
+    let bh = (14.5, 13.);
+    let bi = (7.5, 17.);
+    let bj = (14.5, 17.);
+    let bk = (6.5, 13.);
+    let bl = (15.5, 13.);
+    let bm = (6.5, 17.);
+    let bn = (15.5, 17.);
+    let bo = (9., 0.);
+    let bp = (9., 1.);
+    let bq = (9., 5.);
+    let br = (6.5, 6.);
+    let bs = (15.5, 6.);
+    let bt = (6.5, 9.);
+    let bu = (15.5, 9.);
+    let bv = (6.5, 21.);
+    let bw = (15.5, 21.);
+    let bx = (6.5, 24.);
+    let by = (15.5, 24.);
+    let bz = (7.5, 28.);
+    let ca = (14.5, 28.);
+    let cb = (7.5, 31.);
+    let cc = (14.5, 31.);
+
+    const CEILING_OFFSET: f32 = 0.4;
 
     SceneBuilder::new()
         .with_wall(wall(a, f))
         .with_wall(wall(a, c))
         .with_wall(wall(b, d))
         .with_wall(wall(c, k))
+        .with_wall(wall(d, bp))
         .with_wall(wall(e, i))
+        .with_wall(wall(e, bq))
         .with_wall(wall(f, bf))
         .with_wall(wall(g, z))
         .with_wall(wall(h, p))
         .with_wall(wall(i, n))
         .with_wall(wall(j, m))
+        .with_wall(wall(j, bf)
+            .with_collision(false)
+            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_height(CEILING_OFFSET)
+        )
         .with_wall(wall(k, o))
         .with_wall(wall(l, q))
         .with_wall(wall(m, ae))
-        .with_wall(wall(r, t))
-        .with_wall(wall(s, u))
+        .with_wall(wall(p, r)
+            .with_collision(false)
+            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_height(CEILING_OFFSET)
+        )
+        .with_wall(wall(p, bt))
+        .with_wall(wall(q, s)
+            .with_collision(false)
+            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_height(CEILING_OFFSET)
+        )
+        .with_wall(wall(q, bu))
+        
+        .with_wall(wall(t, v)
+            .with_collision(false)
+            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_height(CEILING_OFFSET)
+        )
+        .with_wall(wall(u, w)
+            .with_collision(false)
+            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_height(CEILING_OFFSET)
+        )
         .with_wall(wall(v, aa))
+        .with_wall(wall(v, bv))
         .with_wall(wall(w, ad))
+        .with_wall(wall(w, bw))
         .with_wall(wall(x, ab))
         .with_wall(wall(y, ac))
         .with_wall(wall(z, ab))
         .with_wall(wall(aa, ag))
+        .with_wall(wall(ac, ae))
         .with_wall(wall(ad, ah))
         .with_wall(wall(af, ag))
         .with_wall(wall(af, al))
         .with_wall(wall(ah, ai))
         .with_wall(wall(ai, aq))
         .with_wall(wall(aj, am))
+        .with_wall(wall(aj, bz))
         .with_wall(wall(ak, ap))
+        .with_wall(wall(ak, ca))
         .with_wall(wall(al, an))
         .with_wall(wall(an, ay))
         .with_wall(wall(ao, aq))
@@ -152,7 +210,48 @@ fn setup(
         .with_wall(wall(ax, be))
         .with_wall(wall(ay, bc))
         .with_wall(wall(ba, bd))
-        .with_wall(wall(bd, bc))
+        .with_wall(wall(bd, be))
+        .with_wall(wall(bf, bq))
+        .with_wall(wall(bg, bk))
+        .with_wall(wall(bg, bi))
+        .with_wall(wall(bh, bl))
+        .with_wall(wall(bh, bj))
+        .with_wall(wall(bi, bm))
+        .with_wall(wall(bj, bn))
+        .with_wall(wall(bk, bm))
+        .with_wall(wall(bl, bn))
+        .with_wall(wall(bo, bp))
+        .with_wall(wall(br, bt))
+        .with_wall(wall(bs, bu))
+        .with_wall(wall(bv, bx))
+        .with_wall(wall(bw, by))
+        .with_wall(wall(bz, cb))
+        .with_wall(wall(ca, cc))
+
+        .with_floor(
+            FloorBuilder::new(a, k)
+                .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+                .with_texture(textures.ceiling_panel.clone())
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(g, aa)
+                .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+                .with_texture(textures.ceiling_panel.clone())
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(l, ae)
+                .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+                .with_texture(textures.ceiling_panel.clone())
+                .autotile()
+        )
+
+        .with_floor(
+            FloorBuilder::new(a, k)
+                .with_texture(textures.birch_floor.clone())
+                .autotile()
+        )
 
         .with_floor(
             FloorBuilder::new((100., 100.), (-100., -100.))
@@ -202,7 +301,7 @@ fn input(
                 angles.add_yaw(-event.delta.x * SENSITIVITY);
             }
 
-            const MOVESPEED: f32 = 0.02;
+            const MOVESPEED: f32 = 0.05;
             let mut movement = Vec2::default();
             
             if kb.pressed(KeyCode::W) {
@@ -232,7 +331,7 @@ fn input(
                     let d_from = closest.distance(object.from);
                     let d_to = closest.distance(object.to);
 
-                    const ERROR: f32 = 0.01;
+                    const ERROR: f32 = 0.5;
                     if d_from + d_to >= object.len - ERROR && d_from + d_to <= object.len + ERROR {
                         let collision_distance = closest.distance(pos2d);
                         if collision_distance <= PLAYER_RADIUS {
@@ -261,7 +360,7 @@ fn input(
     }
 }
 
-const PLAYER_RADIUS: f32 = 0.16;
+const PLAYER_RADIUS: f32 = 0.32;
 
 /// Marker component specifying that a collision object is controlled with the keyboard and mouse
 #[derive(Component)]
@@ -324,6 +423,8 @@ impl SceneBuilder {
         });
     }
 }
+
+const WALL_HEIGHT: f32 = 3.7;
 
 /// Structure containing all data needed for a wall
 struct WallBuilder {
@@ -393,8 +494,8 @@ impl FloorBuilder {
 
     /// Calculate texture repetitions based on size of the floor
     pub fn autotile(mut self) -> Self {
-        self.tiles_wide = (self.from - self.to).x.abs();
-        self.tiles_tall = (self.from - self.to).y.abs();
+        self.tiles_wide = (self.from - self.to).x.abs() / 2.;
+        self.tiles_tall = (self.from - self.to).y.abs() / 2.;
         self
     }
 
@@ -474,7 +575,7 @@ impl WallBuilder {
         Self {
             collision: true,
             h_off: 0.,
-            height: 3.7,
+            height: WALL_HEIGHT,
             texture: None,
             color: Color::rgb(color, color, color),
             from,
