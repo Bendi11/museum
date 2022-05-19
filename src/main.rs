@@ -1,39 +1,34 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 
 use bevy::{
-    prelude::{*, shape::Quad},
-    input::{mouse::{MouseMotion, MouseButtonInput},
-        keyboard::KeyboardInput, ElementState},
+    prelude::*,
+    input::{
+        mouse::{MouseMotion, MouseButtonInput},
+        ElementState
+    },
     render::{
         mesh::{PrimitiveTopology, Indices},
-        render_resource::Face},
-    window::WindowMode,
+        render_resource::{FilterMode, AddressMode}, texture::{CompressedImageFormats, ImageType}},
     ecs::system::EntityCommands,
 };
-use bevy_asset_loader::{AssetLoader, AssetCollection};
 use smooth_bevy_cameras::{LookAngles, LookTransform, LookTransformBundle, LookTransformPlugin, Smoother};
 use impacted::CollisionShape;
 
 fn main() {
-    let mut app = App::new();
-    AssetLoader::new(State::Loading)
-        .continue_to_state(State::Main)
-        .with_collection::<Textures>()
-        .build(&mut app);
-    app.add_state(State::Loading)
+    App::new()
         .insert_resource(WindowDescriptor {
             title: "Museum".to_owned(),
             present_mode: bevy::window::PresentMode::Fifo,
             ..Default::default()
         })
+        .init_resource::<Textures>()
         //.insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(LookTransformPlugin)
         .add_system_to_stage(CoreStage::PostUpdate, update_transforms)
-        .add_system_set(SystemSet::on_enter(State::Main).with_system(setup))
-        .add_system_set(SystemSet::on_update(State::Main)
-            .with_system(input)
-        )
+        .add_startup_system(load_textures.before(setup))
+        .add_startup_system(setup)
+        .add_system(input)
         .run();
 }
 
@@ -46,12 +41,14 @@ fn setup(
     textures: Res<Textures>,
 ) {
     light.color = Color::WHITE;
-    light.brightness = 1.;
+    light.brightness = 1.2;
     windows.get_primary_mut().map(|window| {
         window.set_resizable(true);
         window.set_cursor_lock_mode(true);
         window.set_cursor_visibility(false);
     });
+
+    let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
     
     let a = (0., 0.);
     let b = (0., -2.);
@@ -64,55 +61,32 @@ fn setup(
     let i = (-3., -3.);
     let j = (-8., -3.);
     let k = (-4., -3.);
+    let l = (-2., -3.);
+    let m = (-10., -3.);
+    let n = (1., -3.);
+    let o = (-13., -3.);
     
     SceneBuilder::new()
-        .with_floor(FloorBuilder::new(a, c))
-        .with_floor(FloorBuilder::new(d, h))
-        .with_wall(WallBuilder::new(a, d))
-        .with_wall(WallBuilder::new(a, b))
-        .with_wall(WallBuilder::new(b, c))
-        .with_wall(WallBuilder::new(c, f)
-            .with_height(1.2)
-        )
-        .with_wall(WallBuilder::new(d, e)
-            .with_height(1.2)
-        )
-        .with_wall(WallBuilder::new(e, f)
-            .with_collision(false)
-            .with_offset(0.8)
-            .with_height(0.4)
-        )
+        .with_wall(wall(a, g).with_texture(textures.blue_trimmed_wall.clone()).with_height(1.2).autotile_len())
+        .with_wall(wall(a, b))
+        .with_wall(wall(b, c))
+        .with_wall(wall(d, e).with_height(1.2))
+        .with_wall(wall(e, f).with_height(0.2).with_offset(1.0).with_collision(false).with_texture(textures.blue_trimmed_wall.clone()))
+        .with_wall(wall(g, h).with_height(1.2))
+        .with_wall(wall(i, f).with_height(1.2))
+        .with_wall(wall(j, o).with_height(1.2))
+        .with_wall(wall(k, n).with_height(1.2))
 
-        .with_wall(WallBuilder::new(d, g)
-            .with_height(1.2)
-        )
-        .with_wall(WallBuilder::new(g, h)
-            .with_height(1.2)
-        )
-        .with_wall(WallBuilder::new(h, j)
-            .with_height(1.2)
-        )
-        .with_wall(WallBuilder::new(i, k)
-            .with_height(1.2)
-        )
-        .with_wall(WallBuilder::new(c, i)
-            .with_height(1.2)
-        )
-        .with_wall(WallBuilder::new(j, k)
-            .with_collision(false)
-            .with_height(0.2)
-            .with_offset(1.)
-        )
-
-        .with_floor(FloorBuilder::new(a, c).with_offset(1.))
-        .with_floor(FloorBuilder::new(d, h).with_offset(1.2))
+        .with_floor(FloorBuilder::new(a, h).with_texture(textures.birch_floor.clone()).autotile())
+        .with_floor(FloorBuilder::new(a, c).with_offset(1.).with_texture(textures.ceiling_panel.clone()).autotile())
+        .with_floor(FloorBuilder::new(d, h).with_offset(1.2).with_texture(textures.ceiling_panel.clone()).autotile())
 
         .finish(&mut commands, &mut meshes, &mut materials);
 
     commands.spawn_bundle(LookTransformBundle {
         transform: LookTransform {
-            eye: Vec3::new(-1.5, 0.25, -1.),
-            target: Vec3::new(-1.5, 0.25, -2.),
+            eye: Vec3::new(-1.5, 0.4, -1.),
+            target: Vec3::new(-1.5, 0.3, -2.),
         },
         smoother: Smoother::new(0.7),
     })
@@ -139,8 +113,8 @@ fn input(
             angles.add_pitch(-event.delta.y * SENSITIVITY);
             angles.add_yaw(-event.delta.x * SENSITIVITY);
         }
+         
         camera.target = camera.eye + 1. * camera.radius() * angles.unit_vector();
-
         let yaw_rot = Quat::from_axis_angle(Vec3::Y, angles.get_yaw());
         let rot_x = yaw_rot * Vec3::X;
         let rot_y = yaw_rot * Vec3::Y;
@@ -201,11 +175,6 @@ pub enum State {
     Main
 }
 
-#[derive(AssetCollection)]
-struct Textures {
-    #[asset(path="floor.png")]
-    floor: Handle<Image>,
-}
 
 /// Structure for constructing the map
 struct SceneBuilder {
@@ -265,6 +234,10 @@ struct WallBuilder {
     from: Vec2,
     /// Where the wall ends
     to: Vec2,
+    /// How many times to repeat the applied texture in the X coordinate
+    tiles_wide: f32,
+    /// How many times to repeat the applied texture in the Y coordinate
+    tiles_tall: f32
 }
 
 /// A rectangle floor 
@@ -279,6 +252,10 @@ struct FloorBuilder {
     color: Color,
     /// Height offset of the floor
     height: f32,
+    /// How many times to repeat the applied texture in the X coordinate
+    tiles_wide: f32,
+    /// How many times to repeat the applied texture in the Y coordinate
+    tiles_tall: f32,
 }
 
 impl FloorBuilder {
@@ -292,7 +269,23 @@ impl FloorBuilder {
             color: Color::rgb(0.4, 0.4, 0.4),
             from,
             to,
+            tiles_wide: 1.,
+            tiles_tall: 1.,
         }
+    }
+    
+    /// Set how many times to repeat the applied texture in X and Y coordinates
+    pub fn with_tiles(mut self, width: f32, height: f32) -> Self {
+        self.tiles_wide = width;
+        self.tiles_tall = height;
+        self
+    }
+    
+    /// Calculate texture repetitions based on size of the floor
+    pub fn autotile(mut self) -> Self {
+        self.tiles_wide = (self.from - self.to).x.abs();
+        self.tiles_tall = (self.from - self.to).y.abs();
+        self
     }
     
     /// Add a texture to this wall
@@ -337,9 +330,9 @@ impl FloorBuilder {
             Mesh::ATTRIBUTE_UV_0,
             vec![
                 [0., 0.],
-                [1., 0.],
-                [0., 1.],
-                [1., 1.]
+                [self.tiles_wide, 0.],
+                [0., self.tiles_tall],
+                [self.tiles_wide, self.tiles_tall]
             ],
         );
 
@@ -383,8 +376,31 @@ impl WallBuilder {
             color: Color::rgb(color, color, color),
             from,
             to,
+            tiles_tall: 1.,
+            tiles_wide: 1.,
         }
     }
+    
+    /// Set the amount of times to repeat the applied texture
+    pub fn with_tiles(mut self, wide: f32, tall: f32) -> Self {
+        self.tiles_wide = wide;
+        self.tiles_tall = tall;
+        self
+    }
+    
+    /// Calculate how many times to repeat the tile based on height and length of the wall
+    pub fn autotile(mut self) -> Self {
+        self.tiles_wide = self.from.distance(self.to);
+        self.tiles_tall = self.height;
+        self
+    }
+    
+    /// Calculate how many times to repeat the texture based on length, while always using one
+    /// tile's height for the height
+    pub fn autotile_len(mut self) -> Self {
+        self.tiles_wide = self.from.distance(self.to);
+        self
+    } 
     
     /// Add a texture to this wall
     pub fn with_texture(mut self, texture: Handle<Image>) -> Self {
@@ -434,17 +450,15 @@ impl WallBuilder {
         let direction = self.from - self.to;
         let norm = Vec2::new(-direction.y, direction.x);
 
-        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, verts.iter().map(|vert|
-            [norm.x, 0., norm.y]//Vec3::from_slice(vert).normalize().to_array()
-        ).collect::<Vec<_>>());
+        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[norm.x, 0., norm.y] ; 4]);
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, verts);
         mesh.insert_attribute(
             Mesh::ATTRIBUTE_UV_0,
             vec![
+                [self.tiles_wide, self.tiles_tall],
+                [0., self.tiles_tall],
+                [self.tiles_wide, 0.],
                 [0., 0.],
-                [1., 0.],
-                [0., 1.],
-                [1., 1.]
             ],
         );
 
@@ -477,6 +491,35 @@ impl WallBuilder {
     }
 
 
+}
+
+#[derive(Default)]
+struct Textures {
+    birch_floor: Handle<Image>,
+    blue_trimmed_wall: Handle<Image>,
+    ceiling_panel: Handle<Image>,
+}
+
+/// Load all textures and set their repeat mode
+fn load_textures(
+    mut images: ResMut<Assets<Image>>,
+    mut textures: ResMut<Textures>,
+) {
+    let mut load = |buf: &[u8]| {
+        let mut image = Image::from_buffer(buf, ImageType::MimeType("image/png"), CompressedImageFormats::empty(), false).expect("Failed to load texture");
+        image.sampler_descriptor.mag_filter = FilterMode::Nearest;
+        image.sampler_descriptor.min_filter = FilterMode::Nearest;
+        image.sampler_descriptor.address_mode_u = AddressMode::Repeat;
+        image.sampler_descriptor.address_mode_v = AddressMode::Repeat;
+        image.sampler_descriptor.address_mode_w = AddressMode::Repeat;
+
+        images.add(image)
+    };
+    
+
+    textures.birch_floor = load(include_bytes!("../assets/birch-floor.png"));
+    textures.blue_trimmed_wall = load(include_bytes!("../assets/blue-trimmed-wall.png"));
+    textures.ceiling_panel = load(include_bytes!("../assets/ceiling-panel.png"));
 }
 
 fn update_transforms(mut shapes: Query<(&mut CollisionShape, &GlobalTransform), (Changed<GlobalTransform>, Without<StaticGeom>)>) {
