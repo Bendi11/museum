@@ -221,8 +221,8 @@ fn input(
                     }
                 }
             }
-            pos.x = pos.x;
-            pos.z = pos.y;
+            pos.x = pos2d.x;
+            pos.z = pos2d.y;
             
             camera.eye = pos;
             camera.target = camera.eye + camera.radius() * angles.unit_vector();
