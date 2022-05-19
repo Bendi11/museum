@@ -84,8 +84,8 @@ fn setup(
     let ad = (15., 24.);
     let ae = (21., 24.);
     let af = (1., 25.);
-    let ag = (7., 25.);
-    let ah = (15., 25.);
+    let ag = (9., 25.);
+    let ah = (13., 25.);
     let ai = (21., 25.);
     let aj = (7., 28.);
     let ak = (15., 28.);
@@ -129,10 +129,10 @@ fn setup(
     let bw = (15.5, 21.);
     let bx = (6.5, 24.);
     let by = (15.5, 24.);
-    let bz = (7.5, 28.);
-    let ca = (14.5, 28.);
-    let cb = (7.5, 31.);
-    let cc = (14.5, 31.);
+    let bz = (8., 28.);
+    let ca = (14., 28.);
+    let cb = (7., 25.);
+    let cc = (15., 25.);
 
     const CEILING_OFFSET: f32 = 0.4;
 
@@ -157,29 +157,18 @@ fn setup(
         .with_wall(wall(k, o))
         .with_wall(wall(l, q))
         .with_wall(wall(m, ae))
-        .with_wall(wall(p, r)
+        .with_wall(wall(p, v)
             .with_collision(false)
             .with_offset(WALL_HEIGHT - CEILING_OFFSET)
             .with_height(CEILING_OFFSET)
         )
         .with_wall(wall(p, bt))
-        .with_wall(wall(q, s)
+        .with_wall(wall(q, w)
             .with_collision(false)
             .with_offset(WALL_HEIGHT - CEILING_OFFSET)
             .with_height(CEILING_OFFSET)
         )
         .with_wall(wall(q, bu))
-        
-        .with_wall(wall(t, v)
-            .with_collision(false)
-            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
-            .with_height(CEILING_OFFSET)
-        )
-        .with_wall(wall(u, w)
-            .with_collision(false)
-            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
-            .with_height(CEILING_OFFSET)
-        )
         .with_wall(wall(v, aa))
         .with_wall(wall(v, bv))
         .with_wall(wall(w, ad))
@@ -187,19 +176,51 @@ fn setup(
         .with_wall(wall(x, ab))
         .with_wall(wall(y, ac))
         .with_wall(wall(z, ab))
-        .with_wall(wall(aa, ag))
+        .with_wall(wall(ab, ag)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+        )
+        .with_wall(wall(ab, ac)
+            .with_collision(false)
+            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_height(CEILING_OFFSET)
+        )
         .with_wall(wall(ac, ae))
-        .with_wall(wall(ad, ah))
-        .with_wall(wall(af, ag))
+        .with_wall(wall(ac, ah)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+        )
+        .with_wall(wall(af, ag)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+        )
         .with_wall(wall(af, al))
-        .with_wall(wall(ah, ai))
+        .with_wall(wall(ah, ai)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+        )
         .with_wall(wall(ai, aq))
         .with_wall(wall(aj, am))
-        .with_wall(wall(aj, bz))
+        .with_wall(wall(aj, bz)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+        )
+        .with_wall(wall(aj, cb)
+            .with_height(CEILING_OFFSET)
+            .with_offset(WALL_HEIGHT)
+            .with_collision(false)
+        )
         .with_wall(wall(ak, ap))
-        .with_wall(wall(ak, ca))
+        .with_wall(wall(ak, ca)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+        )
+        .with_wall(wall(ak, cc)
+            .with_height(CEILING_OFFSET)
+            .with_offset(WALL_HEIGHT)
+            .with_collision(false)
+        )
         .with_wall(wall(al, an))
         .with_wall(wall(an, ay))
+        .with_wall(wall(an, ao)
+            .with_height(CEILING_OFFSET)
+            .with_offset(WALL_HEIGHT)
+            .with_collision(false)
+        )
         .with_wall(wall(ao, aq))
         .with_wall(wall(ao, ar))
         .with_wall(wall(ar, at))
@@ -225,8 +246,12 @@ fn setup(
         .with_wall(wall(bs, bu))
         .with_wall(wall(bv, bx))
         .with_wall(wall(bw, by))
-        .with_wall(wall(bz, cb))
-        .with_wall(wall(ca, cc))
+        .with_wall(wall(bz, an)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+        )
+        .with_wall(wall(ca, ao)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+        )
 
         .with_floor(
             FloorBuilder::new(a, k)
@@ -343,6 +368,8 @@ fn input(
             }
             pos.x = pos2d.x;
             pos.z = pos2d.y;
+
+            println!("({}, {}) - (y: {}, p: {})", pos2d.x, pos2d.y, angles.get_yaw(), angles.get_pitch());
             
             angles.assert_not_looking_up();
             camera.eye = pos;
