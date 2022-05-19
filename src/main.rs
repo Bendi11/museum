@@ -175,16 +175,18 @@ fn setup(
         .with_wall(wall(w, bw))
         .with_wall(wall(x, ab))
         .with_wall(wall(y, ac))
-        .with_wall(wall(z, ab))
+        .with_wall(wall(z, ab).with_height(WALL_HEIGHT + CEILING_OFFSET * 2.))
         .with_wall(wall(ab, ag)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
         )
         .with_wall(wall(ab, ac)
             .with_collision(false)
-            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_offset(WALL_HEIGHT + CEILING_OFFSET)
             .with_height(CEILING_OFFSET)
         )
-        .with_wall(wall(ac, ae))
+        .with_wall(wall(ac, ae)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET * 2.)
+        )
         .with_wall(wall(ac, ah)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
         )
@@ -252,7 +254,32 @@ fn setup(
         .with_wall(wall(ca, ao)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
         )
+    
+        .with_floor(
+            FloorBuilder::new(am, cc)
+                .with_offset(WALL_HEIGHT + CEILING_OFFSET)
+                .with_texture(textures.ceiling_panel.clone())
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(ac, ag)
+            .with_offset(WALL_HEIGHT + CEILING_OFFSET)
+                .with_texture(textures.ceiling_panel.clone())
+                .autotile()
+        )
 
+        .with_floor(
+            FloorBuilder::new(af, am)
+                .with_offset(WALL_HEIGHT)
+                .with_texture(textures.ceiling_panel.clone())
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(ai, ap)
+                .with_offset(WALL_HEIGHT)
+                .with_texture(textures.ceiling_panel.clone())
+                .autotile()
+        )
         .with_floor(
             FloorBuilder::new(a, k)
                 .with_offset(WALL_HEIGHT - CEILING_OFFSET)
@@ -324,6 +351,13 @@ fn input(
             for event in mouse.iter() {
                 angles.add_pitch(-event.delta.y * SENSITIVITY);
                 angles.add_yaw(-event.delta.x * SENSITIVITY);
+            }
+
+            if angles.get_pitch() == 0. {
+                angles.set_pitch(0.01);
+            }
+            if angles.get_yaw() == 0. {
+                angles.set_yaw(0.01);
             }
 
             const MOVESPEED: f32 = 0.05;
