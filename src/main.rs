@@ -69,7 +69,18 @@ fn setup(
     let o = (-13., -3.);
     let p = (-10., -5.);
     let q = (-2., -5.);
-    //let r = (-10., )
+    let r = (-10., -7.);
+    let s = (-2., -7.);
+    let t = (-10., -8.);
+    let u = (-2., -8.);
+    let v = (-10., -10.);
+    let w = (-2., -10.);
+    let x = (-10., -11.);
+    let y = (-2., -11.);
+    let z = (-8., -11.);
+    let aa = (-4., -11.);
+    let ab = (-13., -11.);
+    let ac = (1., -11.);
 
     let tall = 1.2;
 
@@ -114,14 +125,41 @@ fn setup(
         .with_wall(wall(j, o).with_height(tall))
         .with_wall(wall(k, n).with_height(tall))
         
-        .with_wall(wall(m, p).with_height(tall))
-        .with_wall(wall(l, q).with_height(tall))
+        .with_wall(wall(m, p).with_height(tall).with_texture(textures.limestone_wall.clone()).autotile_len())
+        .with_wall(wall(l, q).with_height(tall).with_texture(textures.limestone_wall.clone()).autotile_len())
+
+        .with_wall(wall(r, t).with_height(tall).with_texture(textures.limestone_wall.clone()))
+        .with_wall(wall(s, u).with_height(tall).with_texture(textures.limestone_wall.clone()))
+
+        .with_wall(wall(v, x).with_height(tall).with_texture(textures.limestone_wall.clone()))
+        .with_wall(wall(w, y).with_height(tall).with_texture(textures.limestone_wall.clone()))
+
+        .with_wall(wall(z, ab).with_height(tall))
+        .with_wall(wall(aa, ac).with_height(tall))
+
+        .with_wall(wall(n, ac).with_height(tall))
+        .with_wall(wall(o, ab).with_height(tall))
+        
+
+        .with_floor(
+            FloorBuilder::new(m, y)
+                .with_texture(textures.flagstone_floor.clone())
+                .with_offset(0.0001)
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(o, ac)
+                .with_texture(textures.birch_floor.clone())
+                .autotile()
+        )
 
         .with_floor(
             FloorBuilder::new(a, h)
                 .with_texture(textures.birch_floor.clone())
                 .autotile(),
         )
+
+
         .with_floor(
             FloorBuilder::new(a, c)
                 .with_offset(1.)
@@ -133,6 +171,16 @@ fn setup(
                 .with_offset(tall)
                 .with_texture(textures.ceiling_panel.clone())
                 .autotile(),
+        )
+        .with_floor(
+            FloorBuilder::new(l, ac)
+                .with_offset(tall)
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(o, x)
+                .with_offset(tall)
+                .autotile()
         )
 
         
@@ -214,7 +262,7 @@ fn input(
                     let d_from = closest.distance(object.from);
                     let d_to = closest.distance(object.to);
 
-                    const ERROR: f32 = 0.1;
+                    const ERROR: f32 = 0.01;
                     if d_from + d_to >= object.len - ERROR && d_from + d_to <= object.len + ERROR {
                         let collision_distance = closest.distance(pos2d);
                         if collision_distance <= PLAYER_RADIUS {
@@ -419,8 +467,6 @@ impl FloorBuilder {
             [self.to.x, self.height, self.to.y],     //tr
         ];
 
-        let direction = self.from - self.to;
-        let norm = Vec2::new(-direction.y, direction.x);
 
         mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0., 0., 1.]; 4]);
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, verts);
@@ -436,7 +482,7 @@ impl FloorBuilder {
 
         mesh.set_indices(Some(Indices::U16(vec![0, 2, 1, 3, 1, 2])));
 
-        let mut command = commands.spawn_bundle(PbrBundle {
+        let command = commands.spawn_bundle(PbrBundle {
             mesh: meshes.add(mesh.clone()),
             material: materials.add(StandardMaterial {
                 base_color: self.color,
@@ -589,7 +635,9 @@ impl WallBuilder {
 #[derive(Default)]
 struct Textures {
     birch_floor: Handle<Image>,
+    flagstone_floor: Handle<Image>,
     blue_trimmed_wall: Handle<Image>,
+    limestone_wall: Handle<Image>,
     ceiling_panel: Handle<Image>,
     sky: Handle<Image>,
 }
@@ -617,4 +665,6 @@ fn load_textures(mut images: ResMut<Assets<Image>>, mut textures: ResMut<Texture
     textures.blue_trimmed_wall = load(include_bytes!("../assets/blue-trimmed-wall.png"));
     textures.ceiling_panel = load(include_bytes!("../assets/ceiling-panel.png"));
     textures.sky = load(include_bytes!("../assets/sky.png"));
+    textures.flagstone_floor = load(include_bytes!("../assets/flagstone-floor.png"));
+    textures.limestone_wall = load(include_bytes!("../assets/limestone-wall.png"));
 }
