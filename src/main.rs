@@ -185,11 +185,12 @@ fn input(
             let rot_z = yaw_rot * Vec3::Z;
 
             const MOVESPEED: f32 = 0.02;
-            let mut movement = Vec3::default();
+            let mut movement = Vec2::default();
+            
             if kb.pressed(KeyCode::W) {
-                movement.z += MOVESPEED;
+                movement.y += MOVESPEED;
             } else if kb.pressed(KeyCode::S) {
-                movement.z -= MOVESPEED;
+                movement.y -= MOVESPEED;
             }
 
             if kb.pressed(KeyCode::D) {
@@ -197,10 +198,12 @@ fn input(
             } else if kb.pressed(KeyCode::A) {
                 movement.x += MOVESPEED;
             }
+            let speed = movement.length();
+            let movement_3d = Vec3::new(movement.x, 0., movement.y);
 
-            let mut pos = camera.eye + (movement.x * rot_x + movement.y * rot_y + movement.z * rot_z);
+            let mut pos = camera.eye + (movement_3d.x * rot_x + movement_3d.y * rot_y + movement_3d.z * rot_z);
             let mut pos2d = Vec2::new(pos.x, pos.z);
-            if movement != Vec3::default() {
+            if movement != Vec2::default() {
                 for object in objects.iter() {
                     let dot = ( ( (pos2d.x - object.from.x) * (object.to.x - object.from.x)) + ((pos2d.y - object.from.y) * (object.to.y - object.from.y))) / (object.len.powi(2));
                     let closest = Vec2::new(
@@ -216,7 +219,7 @@ fn input(
                         let collision_distance = closest.distance(pos2d);
                         if collision_distance <= PLAYER_RADIUS {
                             let unit = (closest - pos2d).normalize();
-                            pos2d -= unit * collision_distance;
+                            pos2d -= unit * speed;//collision_distance;
                         }
                     }
                 }
