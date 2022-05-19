@@ -7,7 +7,6 @@ edition = "2021"
 [dependencies]
 bevy = "0.7"
 smooth-bevy-cameras = "0.4"
-impacted = {version = "1.4", features = ["bevy-07"] }
 
 [profile.dev]
 opt-level = 1
