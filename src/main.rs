@@ -10,7 +10,7 @@ use bevy::{
     render::{
         mesh::{Indices, PrimitiveTopology},
         render_resource::{AddressMode, FilterMode},
-        texture::{CompressedImageFormats, ImageType},
+        texture::{CompressedImageFormats, ImageType}, render_phase::Draw,
     },
 };
 use smooth_bevy_cameras::{
@@ -61,7 +61,7 @@ fn setup(
     let g = (1., 6.);
     let h = (7., 6.);
     let i = (8., 6.);
-    let j = (13., 6.);
+    //let j = (13., 6.);
     let k = (14., 6.);
     let l = (15., 6.);
     let m = (21., 6.);
@@ -133,128 +133,310 @@ fn setup(
     let ca = (14., 28.);
     let cb = (7., 25.);
     let cc = (15., 25.);
+    let cd = (33., 39.);
+    let ce = (23., 39.5);
+    let cf = (29., 39.5);
 
     const CEILING_OFFSET: f32 = 0.4;
 
     SceneBuilder::new()
-        .with_wall(wall(a, f))
-        .with_wall(wall(a, c))
-        .with_wall(wall(b, d))
-        .with_wall(wall(c, k))
-        .with_wall(wall(d, bp))
-        .with_wall(wall(e, i))
-        .with_wall(wall(e, bq))
-        .with_wall(wall(f, bf))
-        .with_wall(wall(g, z))
-        .with_wall(wall(h, p))
-        .with_wall(wall(i, n))
-        .with_wall(wall(j, m))
-        .with_wall(wall(j, bf)
+        .with_wall(wall(a, f)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(a, c)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(b, d)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(c, k)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(d, bp)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(e, i)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(e, bq)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(f, bf)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.eggshell_wall.clone())
+        )
+        .with_wall(wall(g, z)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
+        .with_wall(wall(h, p)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+        )
+        .with_wall(wall(k, m)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.eggshell_wall.clone())
+        )
+        .with_wall(wall(k, bf)
             .with_collision(false)
             .with_offset(WALL_HEIGHT - CEILING_OFFSET)
-            .with_height(CEILING_OFFSET)
+            .with_height(CEILING_OFFSET * 2.)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(1., 0.2)
         )
-        .with_wall(wall(k, o))
-        .with_wall(wall(l, q))
-        .with_wall(wall(m, ae))
+        .with_wall(wall(k, o)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.5, 1.)
+        )
+        .with_wall(wall(l, q)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+        )
+        .with_wall(wall(m, ae)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
+        .with_wall(wall(n, bf)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.5, 1.)
+        )
         .with_wall(wall(p, v)
             .with_collision(false)
-            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_offset(WALL_HEIGHT)
             .with_height(CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(4., 0.2)
         )
-        .with_wall(wall(p, bt))
+        .with_wall(wall(p, bt)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.3, 1.)
+        )
         .with_wall(wall(q, w)
             .with_collision(false)
-            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_offset(WALL_HEIGHT)
             .with_height(CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(4., 0.2)
         )
-        .with_wall(wall(q, bu))
-        .with_wall(wall(v, aa))
-        .with_wall(wall(v, bv))
-        .with_wall(wall(w, ad))
-        .with_wall(wall(w, bw))
-        .with_wall(wall(x, ab))
-        .with_wall(wall(y, ac))
-        .with_wall(wall(z, ab).with_height(WALL_HEIGHT + CEILING_OFFSET * 2.))
-        .with_wall(wall(ab, ag)
+        .with_wall(wall(q, bu)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.3, 1.)
+        )
+        .with_wall(wall(v, aa)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
         )
-        .with_wall(wall(ab, ac)
+        .with_wall(wall(v, bv)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.3, 1.)
+        )
+        .with_wall(wall(w, ad)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+        )
+        .with_wall(wall(w, bw)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.3, 1.)
+        )
+        .with_wall(wall(x, ab)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+        )
+        .with_wall(wall(y, ac)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+        )
+        .with_wall(wall(z, ab)
+            .with_height(WALL_HEIGHT)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
+        .with_wall(wall(z, ae)
             .with_collision(false)
             .with_offset(WALL_HEIGHT + CEILING_OFFSET)
             .with_height(CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(10., 0.2)
+        )
+        .with_wall(wall(ab, ag)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.eggshell_wall.clone())
+            .with_tiles(0.2, 1.)
         )
         .with_wall(wall(ac, ae)
-            .with_height(WALL_HEIGHT + CEILING_OFFSET * 2.)
+            .with_height(WALL_HEIGHT)
+            .with_texture(textures.red_trimmed_wall.clone())
         )
         .with_wall(wall(ac, ah)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.eggshell_wall.clone())
+            .with_tiles(0.2, 1.)
         )
         .with_wall(wall(af, ag)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.blue_trimmed_wall.clone())
         )
-        .with_wall(wall(af, al))
+        .with_wall(wall(af, al)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
         .with_wall(wall(ah, ai)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.blue_trimmed_wall.clone())
         )
-        .with_wall(wall(ai, aq))
-        .with_wall(wall(aj, am))
+        .with_wall(wall(ai, aq)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(aj, am)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
         .with_wall(wall(aj, bz)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.green_trimmed_wall.clone())
         )
         .with_wall(wall(aj, cb)
             .with_height(CEILING_OFFSET)
             .with_offset(WALL_HEIGHT)
             .with_collision(false)
         )
-        .with_wall(wall(ak, ap))
+        .with_wall(wall(ak, ap)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
         .with_wall(wall(ak, ca)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.green_trimmed_wall.clone())
         )
         .with_wall(wall(ak, cc)
             .with_height(CEILING_OFFSET)
             .with_offset(WALL_HEIGHT)
             .with_collision(false)
         )
-        .with_wall(wall(al, an))
-        .with_wall(wall(an, ay))
+        .with_wall(wall(al, an)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(an, ay)
+            .with_texture(textures.eggshell_wall.clone())
+        )
         .with_wall(wall(an, ao)
             .with_height(CEILING_OFFSET)
             .with_offset(WALL_HEIGHT)
             .with_collision(false)
         )
-        .with_wall(wall(ao, aq))
-        .with_wall(wall(ao, ar))
-        .with_wall(wall(ar, at))
-        .with_wall(wall(r#as, av))
-        .with_wall(wall(at, ax))
-        .with_wall(wall(au, az))
-        .with_wall(wall(aw, bb))
-        .with_wall(wall(ax, be))
-        .with_wall(wall(ay, bc))
-        .with_wall(wall(ba, bd))
-        .with_wall(wall(bd, be))
-        .with_wall(wall(bf, bq))
-        .with_wall(wall(bg, bk))
-        .with_wall(wall(bg, bi))
-        .with_wall(wall(bh, bl))
-        .with_wall(wall(bh, bj))
-        .with_wall(wall(bi, bm))
-        .with_wall(wall(bj, bn))
-        .with_wall(wall(bk, bm))
-        .with_wall(wall(bl, bn))
-        .with_wall(wall(bo, bp))
-        .with_wall(wall(br, bt))
-        .with_wall(wall(bs, bu))
-        .with_wall(wall(bv, bx))
-        .with_wall(wall(bw, by))
+        .with_wall(wall(ao, aq)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(ao, ar).with_texture(textures.eggshell_wall.clone()))
+        .with_wall(wall(ar, at).with_texture(textures.eggshell_wall.clone()))
+        .with_wall(wall(r#as, av)
+            .with_height(WALL_HEIGHT - 0.9)
+        )
+        .with_wall(wall(at, ax).with_texture(textures.eggshell_wall.clone()))
+        .with_wall(wall(au, az)
+            .with_height(WALL_HEIGHT - 0.9)
+        )
+        .with_wall(wall(aw, bb)
+            .with_height(WALL_HEIGHT - 0.9)
+        )
+        .with_wall(wall(ax, be)
+            .with_texture(textures.red_trimmed_wall.clone())
+        )
+        .with_wall(wall(ay, bc)
+            .with_texture(textures.eggshell_wall.clone())
+        )
+        .with_wall(wall(ba, bd)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
+        .with_wall(wall(bc, cf)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .with_tiles(0.2, 1.)
+        )
+        .with_wall(wall(bc, cd)
+            .with_height(CEILING_OFFSET)
+            .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+            .with_collision(false)
+            .with_texture(textures.eggshell_wall.clone())
+            .with_tiles(2., 0.2)
+        )
+        .with_wall(wall(bd, be)
+            .with_texture(textures.red_trimmed_wall.clone())
+        )
+        .with_wall(wall(bf, bq)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(bg, bk)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.3, 1.)
+        )
+        .with_wall(wall(bg, bi)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+        )
+        .with_wall(wall(bh, bl)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.3, 1.)
+        )
+        .with_wall(wall(bh, bj)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+        )
+        .with_wall(wall(bi, bm)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.3, 1.)
+        )
+        .with_wall(wall(bj, bn)
+            .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.concrete.clone())
+            .with_tiles(0.3, 1.)
+        )
+        .with_wall(wall(bk, bm)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
+        .with_wall(wall(bl, bn)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
+        .with_wall(wall(bo, bp)
+            .with_texture(textures.blue_trimmed_wall.clone())
+        )
+        .with_wall(wall(br, bt)
+            .with_texture(textures.red_trimmed_wall.clone())
+        )
+        .with_wall(wall(bs, bu)
+            .with_texture(textures.red_trimmed_wall.clone())
+        )
+        .with_wall(wall(bv, bx)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
+        .with_wall(wall(bw, by)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
         .with_wall(wall(bz, an)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.green_trimmed_wall.clone())
         )
         .with_wall(wall(ca, ao)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
+            .with_texture(textures.green_trimmed_wall.clone())
         )
-    
+        .with_wall(wall(ce, cf)
+            .with_texture(textures.red_trimmed_wall.clone())
+            .autotile_len()
+        )
+        
+        .with_floor(
+            FloorBuilder::new(ba, be)
+                .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+                .with_texture(textures.ceiling_panel.clone())
+                .autotile()
+        )
         .with_floor(
             FloorBuilder::new(am, cc)
                 .with_offset(WALL_HEIGHT + CEILING_OFFSET)
@@ -284,31 +466,84 @@ fn setup(
             FloorBuilder::new(a, k)
                 .with_offset(WALL_HEIGHT - CEILING_OFFSET)
                 .with_texture(textures.ceiling_panel.clone())
+                .with_brightness(0.8)
                 .autotile()
         )
         .with_floor(
             FloorBuilder::new(g, aa)
-                .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+                .with_offset(WALL_HEIGHT)
                 .with_texture(textures.ceiling_panel.clone())
                 .autotile()
         )
         .with_floor(
             FloorBuilder::new(l, ae)
-                .with_offset(WALL_HEIGHT - CEILING_OFFSET)
+                .with_offset(WALL_HEIGHT)
                 .with_texture(textures.ceiling_panel.clone())
                 .autotile()
         )
 
         .with_floor(
-            FloorBuilder::new(a, k)
-                .with_texture(textures.birch_floor.clone())
+            FloorBuilder::new(an, cd)
+                .with_texture(textures.wood_slat_roof.clone())
+                .with_brightness(0.3)
+                .with_offset(WALL_HEIGHT)
                 .autotile()
         )
 
         .with_floor(
+            FloorBuilder::new(ba, be)
+                .with_texture(textures.oak_floor.clone())
+                .with_brightness(0.5)
+                .autotile()
+        )
+        
+        .with_floor(
+            FloorBuilder::new(af, aq)
+                .with_texture(textures.red_tile_floor.clone())
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(an, cd)
+                .with_texture(textures.linoleum_floor.clone())
+                .with_brightness(0.4)
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(h, ad)
+                .with_texture(textures.flagstone_floor.clone())
+                .with_offset(0.0001)
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(m, z)
+                .with_texture(textures.oak_floor.clone())
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(a, k)
+                .with_texture(textures.birch_floor.clone())
+                .with_brightness(0.6)
+                .autotile()
+        )
+        .with_floor(
+            FloorBuilder::new(aa, ap)
+                .with_texture(textures.tile_floor.clone())
+                .with_brightness(0.7)
+                .with_offset(0.001)
+                .autotile()
+        )
+        
+        .with_floor(
             FloorBuilder::new((100., 100.), (-100., -100.))
                 .with_offset(10.)
                 .with_texture(textures.sky.clone())
+        )
+
+        .with_wall(
+            wall((bj.0 - 1., bj.1), (bj.0, bj.1 - 1.))
+            .with_texture(textures.job_iden.clone())
+            .with_height(3.7)
+            .with_transparency(true)
         )
         .finish(&mut commands, &mut meshes, &mut materials);
     
@@ -316,8 +551,8 @@ fn setup(
     commands
         .spawn_bundle(LookTransformBundle {
             transform: LookTransform {
-                eye: Vec3::new(2., 1.7, 1.5),
-                target: Vec3::new(-2., 1.7, 1.5),
+                eye: Vec3::new(2., 1.25, 1.5),
+            target: Vec3::new(-2., 1.25, 1.5),
             },
             smoother: Smoother::new(0.7),
         })
@@ -360,7 +595,7 @@ fn input(
                 angles.set_yaw(0.01);
             }
 
-            const MOVESPEED: f32 = 0.05;
+            const MOVESPEED: f32 = 0.1;
             let mut movement = Vec2::default();
             
             if kb.pressed(KeyCode::W) {
@@ -402,8 +637,6 @@ fn input(
             }
             pos.x = pos2d.x;
             pos.z = pos2d.y;
-
-            println!("({}, {}) - (y: {}, p: {})", pos2d.x, pos2d.y, angles.get_yaw(), angles.get_pitch());
             
             angles.assert_not_looking_up();
             camera.eye = pos;
@@ -507,6 +740,8 @@ struct WallBuilder {
     tiles_wide: f32,
     /// How many times to repeat the applied texture in the Y coordinate
     tiles_tall: f32,
+    /// Wether or not to enable transparency
+    transparent: bool,
 }
 
 /// A rectangle floor
@@ -544,6 +779,11 @@ impl FloorBuilder {
             tiles_wide: 1.,
             tiles_tall: 1.,
         }
+    }
+    
+    /// Set the brightness of this floor's texture
+    pub fn with_brightness(self, brightness: f32) -> Self {
+        self.with_color(Color::rgb(brightness, brightness, brightness))
     }
 
     /// Set how many times to repeat the applied texture in X and Y coordinates
@@ -632,7 +872,7 @@ impl WallBuilder {
     ) -> Self {
         let from = Vec2::new(from.0.into(), from.1.into());
         let to = Vec2::new(to.0.into(), to.1.into());
-        let color = 0.4 + 0.2 * ((from - to).angle_between(Vec2::Y) / (std::f32::consts::PI * 2.));
+        let color = 0.4 + 0.2 * ((from - to).angle_between(Vec2::Y) / (std::f32::consts::PI * 2.)).abs();
         Self {
             collision: true,
             h_off: 0.,
@@ -643,6 +883,7 @@ impl WallBuilder {
             to,
             tiles_tall: 1.,
             tiles_wide: 1.,
+            transparent: false,
         }
     }
 
@@ -663,7 +904,7 @@ impl WallBuilder {
     /// Calculate how many times to repeat the texture based on length, while always using one
     /// tile's height for the height
     pub fn autotile_len(mut self) -> Self {
-        self.tiles_wide = self.from.distance(self.to);
+        self.tiles_wide = self.from.distance(self.to) / 2.;
         self
     }
 
@@ -671,7 +912,7 @@ impl WallBuilder {
     pub fn with_texture(mut self, texture: Handle<Image>) -> Self {
         self.texture = Some(texture);
         let color = 0.6
-            + 0.2 * ((self.from - self.to).angle_between(Vec2::Y) / (std::f32::consts::PI * 2.));
+            + 0.2 * ((self.from - self.to).angle_between(Vec2::Y) / (std::f32::consts::PI * 2.)).abs();
 
         self.color = Color::WHITE * color;
         self
@@ -698,6 +939,12 @@ impl WallBuilder {
     /// Set the collision for this object
     pub fn with_collision(mut self, collision: bool) -> Self {
         self.collision = collision;
+        self
+    }
+    
+    /// Enable or disable transparency for this wall's texture
+    pub fn with_transparency(mut self, transparency: bool) -> Self {
+        self.transparent = transparency;
         self
     }
 
@@ -740,6 +987,7 @@ impl WallBuilder {
                 base_color_texture: self.texture.clone(),
                 cull_mode: None,
                 unlit: true,
+                alpha_mode: if self.transparent { AlphaMode::Blend } else { AlphaMode::Opaque },
                 ..Default::default()
             }),
             ..default()
@@ -753,7 +1001,6 @@ impl WallBuilder {
                     len: self.from.distance(self.to),
                 });
         }
-
         command
     }
 }
@@ -761,11 +1008,21 @@ impl WallBuilder {
 #[derive(Default)]
 struct Textures {
     birch_floor: Handle<Image>,
+    oak_floor: Handle<Image>,
     flagstone_floor: Handle<Image>,
+    tile_floor: Handle<Image>,
+    red_tile_floor: Handle<Image>,
+    linoleum_floor: Handle<Image>,
     blue_trimmed_wall: Handle<Image>,
+    red_trimmed_wall: Handle<Image>,
+    green_trimmed_wall: Handle<Image>,
     limestone_wall: Handle<Image>,
+    eggshell_wall: Handle<Image>,
+    concrete: Handle<Image>,
     ceiling_panel: Handle<Image>,
+    wood_slat_roof: Handle<Image>,
     sky: Handle<Image>,
+    job_iden: Handle<Image>,
 }
 
 /// Load all textures and set their repeat mode
@@ -789,8 +1046,18 @@ fn load_textures(mut images: ResMut<Assets<Image>>, mut textures: ResMut<Texture
 
     textures.birch_floor = load(include_bytes!("../assets/birch-floor.png"));
     textures.blue_trimmed_wall = load(include_bytes!("../assets/blue-trimmed-wall.png"));
+    textures.red_trimmed_wall = load(include_bytes!("../assets/red-trimmed-wall.png"));
     textures.ceiling_panel = load(include_bytes!("../assets/ceiling-panel.png"));
     textures.sky = load(include_bytes!("../assets/sky.png"));
     textures.flagstone_floor = load(include_bytes!("../assets/flagstone-floor.png"));
     textures.limestone_wall = load(include_bytes!("../assets/limestone-wall.png"));
+    textures.wood_slat_roof = load(include_bytes!("../assets/wood-slat-roof.png"));
+    textures.eggshell_wall = load(include_bytes!("../assets/eggshell-wall.png"));
+    textures.linoleum_floor = load(include_bytes!("../assets/linoleum-floor.png"));
+    textures.concrete = load(include_bytes!("../assets/concrete.png"));
+    textures.oak_floor = load(include_bytes!("../assets/oak-floor.png"));
+    textures.tile_floor = load(include_bytes!("../assets/tile-floor.png"));
+    textures.green_trimmed_wall = load(include_bytes!("../assets/green-trimmed-wall.png"));
+    textures.red_tile_floor = load(include_bytes!("../assets/red-tile-floor.png"));
+    textures.job_iden = load(include_bytes!("../assets/job-iden.png"));
 }
