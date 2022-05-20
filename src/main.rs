@@ -9,7 +9,7 @@ use bevy::{
     prelude::*,
     render::{
         mesh::{Indices, PrimitiveTopology},
-        render_resource::{AddressMode, FilterMode},
+        render_resource::{AddressMode, FilterMode, Face},
         texture::{CompressedImageFormats, ImageType}, render_phase::Draw,
     },
 };
@@ -208,10 +208,12 @@ fn setup(
             .with_height(CEILING_OFFSET)
             .with_texture(textures.concrete.clone())
             .with_tiles(4., 0.2)
+            .with_cull(Face::Back)
         )
         .with_wall(wall(p, bt)
             .with_texture(textures.concrete.clone())
             .with_tiles(0.3, 1.)
+            .with_cull(Face::Back)
         )
         .with_wall(wall(q, w)
             .with_collision(false)
@@ -219,10 +221,12 @@ fn setup(
             .with_height(CEILING_OFFSET)
             .with_texture(textures.concrete.clone())
             .with_tiles(4., 0.2)
+            .with_cull(Face::Front)
         )
         .with_wall(wall(q, bu)
             .with_texture(textures.concrete.clone())
             .with_tiles(0.3, 1.)
+            .with_cull(Face::Front)
         )
         .with_wall(wall(v, aa)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
@@ -369,54 +373,66 @@ fn setup(
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
             .with_texture(textures.concrete.clone())
             .with_tiles(0.3, 1.)
+            .with_cull(Face::Front)
         )
         .with_wall(wall(bg, bi)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
             .with_texture(textures.concrete.clone())
+            .with_cull(Face::Back)
         )
         .with_wall(wall(bh, bl)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
             .with_texture(textures.concrete.clone())
             .with_tiles(0.3, 1.)
+            .with_cull(Face::Back)
         )
         .with_wall(wall(bh, bj)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
             .with_texture(textures.concrete.clone())
+            .with_cull(Face::Front)
         )
         .with_wall(wall(bi, bm)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
             .with_texture(textures.concrete.clone())
             .with_tiles(0.3, 1.)
+            .with_cull(Face::Back)
         )
         .with_wall(wall(bj, bn)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
             .with_texture(textures.concrete.clone())
             .with_tiles(0.3, 1.)
+            .with_cull(Face::Front)
         )
         .with_wall(wall(bk, bm)
             .with_texture(textures.red_trimmed_wall.clone())
             .autotile_len()
+            .with_cull(Face::Front)
         )
         .with_wall(wall(bl, bn)
             .with_texture(textures.red_trimmed_wall.clone())
             .autotile_len()
+            .with_cull(Face::Back)
         )
         .with_wall(wall(bo, bp)
             .with_texture(textures.blue_trimmed_wall.clone())
         )
         .with_wall(wall(br, bt)
             .with_texture(textures.red_trimmed_wall.clone())
+            .with_cull(Face::Front)
         )
         .with_wall(wall(bs, bu)
             .with_texture(textures.red_trimmed_wall.clone())
+            .with_cull(Face::Back)
         )
         .with_wall(wall(bv, bx)
             .with_texture(textures.red_trimmed_wall.clone())
             .autotile_len()
+            .with_cull(Face::Front)
         )
         .with_wall(wall(bw, by)
             .with_texture(textures.red_trimmed_wall.clone())
             .autotile_len()
+            .with_cull(Face::Back)
         )
         .with_wall(wall(bz, an)
             .with_height(WALL_HEIGHT + CEILING_OFFSET)
@@ -474,12 +490,14 @@ fn setup(
                 .with_offset(WALL_HEIGHT)
                 .with_texture(textures.ceiling_panel.clone())
                 .autotile()
+                .with_cull(Face::Front)
         )
         .with_floor(
             FloorBuilder::new(l, ae)
                 .with_offset(WALL_HEIGHT)
                 .with_texture(textures.ceiling_panel.clone())
                 .autotile()
+                .with_cull(Face::Front)
         )
 
         .with_floor(
@@ -540,9 +558,9 @@ fn setup(
         )
 
         .with_wall(
-            wall((bj.0 - 1., bj.1), (bj.0, bj.1 - 1.))
+            wall((bj.0 - 0.5, bj.1), (bj.0, bj.1 - 0.5))
             .with_texture(textures.job_iden.clone())
-            .with_height(3.7)
+            .with_height(2.1)
             .with_transparency(true)
         )
         .finish(&mut commands, &mut meshes, &mut materials);
@@ -742,6 +760,8 @@ struct WallBuilder {
     tiles_tall: f32,
     /// Wether or not to enable transparency
     transparent: bool,
+    /// What side to cull, optional
+    cull: Option<Face>,
 }
 
 /// A rectangle floor
@@ -760,6 +780,8 @@ struct FloorBuilder {
     tiles_wide: f32,
     /// How many times to repeat the applied texture in the Y coordinate
     tiles_tall: f32,
+    /// What side to cull while rendering
+    cull: Option<Face>,
 }
 
 impl FloorBuilder {
@@ -778,7 +800,14 @@ impl FloorBuilder {
             to,
             tiles_wide: 1.,
             tiles_tall: 1.,
+            cull: None,
         }
+    }
+    
+    /// Set what side to cull while rendering
+    pub fn with_cull(mut self, cull: Face) -> Self {
+        self.cull = Some(cull);
+        self
     }
     
     /// Set the brightness of this floor's texture
@@ -853,7 +882,7 @@ impl FloorBuilder {
             material: materials.add(StandardMaterial {
                 base_color: self.color,
                 base_color_texture: self.texture.clone(),
-                cull_mode: None,
+                cull_mode: self.cull,
                 unlit: true,
                 ..Default::default()
             }),
@@ -884,7 +913,14 @@ impl WallBuilder {
             tiles_tall: 1.,
             tiles_wide: 1.,
             transparent: false,
+            cull: None,
         }
+    }
+    
+    /// Set the cull mode of this wall
+    pub fn with_cull(mut self, cull: Face) -> Self {
+        self.cull = Some(cull);
+        self
     }
 
     /// Set the amount of times to repeat the applied texture
@@ -985,7 +1021,7 @@ impl WallBuilder {
             material: materials.add(StandardMaterial {
                 base_color: self.color,
                 base_color_texture: self.texture.clone(),
-                cull_mode: None,
+                cull_mode: self.cull,
                 unlit: true,
                 alpha_mode: if self.transparent { AlphaMode::Blend } else { AlphaMode::Opaque },
                 ..Default::default()
