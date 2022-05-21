@@ -1,4 +1,5 @@
 use super::*;
+use super::scene::*;
 
 /// Set up the museum scene with all walls and interactable objects
 pub fn setup(
@@ -8,6 +9,7 @@ pub fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut light: ResMut<AmbientLight>,
     textures: Res<Textures>,
+    asset_server: Res<AssetServer>,
 ) {
     light.color = Color::WHITE;
     light.brightness = 1.2;
@@ -16,6 +18,38 @@ pub fn setup(
         window.set_cursor_lock_mode(true);
         window.set_cursor_visibility(false);
     });
+
+    let tombstone_txt = commands.spawn()
+        .insert_bundle(TextBundle {
+            style: Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                position: Rect {
+                    //bottom: Val::Px(5.0),
+                    //right: Val::Px(15.0),
+                    top: Val::Percent(50.),
+                    left: Val::Percent(50.),
+                    ..default()
+                },
+                ..default()
+            },
+            text: Text::with_section(
+                "Tombstone",
+                TextStyle {
+                    font: asset_server.load("fonts/times-new-roman.ttf"),
+                    font_size: 24.0,
+                    color: Color::WHITE,
+                },
+                TextAlignment {
+                    horizontal: HorizontalAlign::Center,
+                    ..default()
+                },
+            ),
+            ..default()
+        })
+        .insert(Visibility { is_visible: false, })
+        .id();
+
 
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
 
@@ -603,6 +637,26 @@ pub fn setup(
             .with_height(2.1)
             .with_transparency(true)
         )
+    
+        .with_wall(
+            wall((g.0 + 0.01, g.1 + 2.), (g.0 + 0.01, g.1 + 2.5))
+                .with_texture(textures.tombstone.clone())
+                .with_cull(Face::Back)
+                .with_height(0.25)
+                .with_offset(WALL_HEIGHT / 2. - 0.75)
+                .with_transparency(false)
+                .with_text(tombstone_txt)
+                .with_collision(false)
+        )
+        .with_wall(
+            wall((g.0 + 0.01, g.1 + 4.), (g.0 + 0.01, g.1 + 8.))
+                .with_texture(textures.protest_image.clone())
+                .with_cull(Face::Back)
+                .with_height(2.25)
+                .with_offset(WALL_HEIGHT / 2. - 0.7)
+                .with_collision(false)
+        )
+        
         .finish(&mut commands, &mut meshes, &mut materials);
     
     //Spawn the player
@@ -621,6 +675,48 @@ pub fn setup(
             },
             ..default()
         })
-        .insert(Player);
+        .insert(Player::default());
+    
+    commands.spawn_bundle(UiCameraBundle::default());
+
+    // Text with one section
+    let interact_text = commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                position: Rect {
+                    //bottom: Val::Px(5.0),
+                    //right: Val::Px(15.0),
+                    top: Val::Percent(50.),
+                    left: Val::Percent(50.),
+                    ..default()
+                },
+                ..default()
+            },
+            text: Text::with_section(
+                "[e] Read",
+                TextStyle {
+                    font: asset_server.load("fonts/times-new-roman.ttf"),
+                    font_size: 24.0,
+                    color: Color::WHITE,
+                },
+                TextAlignment {
+                    horizontal: HorizontalAlign::Center,
+                    ..default()
+                },
+            ),
+            ..default()
+        })
+        .insert(Visibility { is_visible: true, })
+        .insert(InteractText)
+        .id();
+
+        commands.spawn()
+        .insert(Tombstone {
+            text: tombstone_txt,
+        })
+        .insert(Interactable { point: Vec2::new(g.0, g.1 + 2.25), });
+
 }
 

@@ -1,4 +1,5 @@
 pub mod setup;
+pub mod scene;
 
 use bevy::{
     ecs::system::EntityCommands,
@@ -10,7 +11,7 @@ use bevy::{
     render::{
         mesh::{Indices, PrimitiveTopology},
         render_resource::{AddressMode, FilterMode, Face},
-        texture::{CompressedImageFormats, ImageType},
+        texture::{CompressedImageFormats, ImageType}, render_phase::Draw,
     },
 };
 use smooth_bevy_cameras::{
@@ -41,12 +42,26 @@ fn input(
     mut mouse: EventReader<MouseMotion>,
     mut mb: EventReader<MouseButtonInput>,
     kb: Res<Input<KeyCode>>,
-    mut players: Query<&mut LookTransform, With<Player>>,
+    mut players: Query<(&mut LookTransform, &mut Player, &mut Smoother)>,
     mut windows: ResMut<Windows>,
-    objects: Query<&LineCollider, Without<Player>>,
+    objects: Query<&LineCollider>,
+    tombstones: Query<(&Tombstone, &Interactable), Without<InteractText>>,
+    mut text: Query<&mut Visibility, Without<InteractText>>,
+    mut interact_text: Query<(&mut Visibility, &mut Text), With<InteractText>>,
 ) {
     const SENSITIVITY: f32 = 0.01;
-    for mut camera in players.iter_mut() {
+    for (mut camera, mut player, mut smoother) in players.iter_mut() {
+        if let Some(txt) = player.viewed_text { 
+            if kb.just_released(KeyCode::E) {
+                text.get_mut(txt).unwrap().is_visible = false;
+                player.viewed_text = None;
+                camera.eye = player.old_eye;
+                camera.target = player.old_target;
+                *smoother = Smoother::new(0.7);
+            }
+            break
+        }
+
         if let Some(dir) = camera.look_direction() {
             let mut angles = LookAngles::from_vector(dir);
             let yaw_rot = Quat::from_axis_angle(Vec3::Y, angles.get_yaw());
@@ -112,6 +127,28 @@ fn input(
             angles.assert_not_looking_up();
             camera.eye = pos;
             camera.target = camera.eye + camera.radius() * angles.unit_vector();
+            player.old_eye = camera.eye;
+            player.old_target = camera.target;
+            
+            let (mut interact_visibility, _) = interact_text.get_single_mut().unwrap();
+            interact_visibility.is_visible = false;
+            //let target2d = Vec2::new(camera.target.x, camera.target.z);
+
+            const INTERACT_RADIUS: f32 = 2.5;
+            for (tombstone, interactable) in tombstones.iter() {
+                if interactable.point.distance(pos2d) < INTERACT_RADIUS {
+                    if kb.just_released(KeyCode::E) {
+                        text.get_mut(tombstone.text).unwrap().is_visible = true; 
+                        player.viewed_text = Some(tombstone.text);
+                        camera.eye = Vec3::new(4., 1., 5.5);
+                        camera.target = Vec3::new(4., 1., 6.);
+                        *smoother = Smoother::new(0.);
+                    } else {
+                        interact_visibility.is_visible = true;
+                    }
+                    break;
+                }
+            }
         }
     }
 
@@ -125,11 +162,24 @@ fn input(
     }
 }
 
+/// Various global state items 
+pub struct GlobalState {
+    pub interact_text: Entity,
+}
+
 const PLAYER_RADIUS: f32 = 0.32;
 
 /// Marker component specifying that a collision object is controlled with the keyboard and mouse
-#[derive(Component)]
-struct Player;
+#[derive(Component, Default)]
+struct Player {
+    /// Viewed text entity
+    viewed_text: Option<Entity>,
+    
+    /// Used to restore state after exiting the read dialogue
+    old_eye: Vec3,
+    /// Used to restore state after exiting the read dialogue
+    old_target: Vec3,
+}
 
 
 /// Collider component that specifies a wall has collision
@@ -143,356 +193,24 @@ pub struct LineCollider {
     len: f32,
 }
 
-/// Structure for constructing the map
-struct SceneBuilder {
-    /// All walls in the scene
-    walls: Vec<WallBuilder>,
-    /// All floors / ceilings in the scene
-    floors: Vec<FloorBuilder>,
+/// Tombtone with text about a museum piece 
+#[derive(Component)]
+pub struct Tombstone {
+    /// Description of the museum piece containing the Text and Visible components
+    pub text: Entity,
 }
 
-impl SceneBuilder {
-    /// Create a new scene builder that contains all data needed to add walls and floors to the
-    /// scene
-    pub fn new() -> Self {
-        Self {
-            walls: vec![],
-            floors: vec![],
-        }
-    }
-
-    /// Add a wall to this scene
-    pub fn with_wall(mut self, wall: WallBuilder) -> Self {
-        self.walls.push(wall);
-        self
-    }
-
-    /// Add a floor to this scene
-    pub fn with_floor(mut self, floor: FloorBuilder) -> Self {
-        self.floors.push(floor);
-        self
-    }
-
-    /// Finish building the scene and add all walls and floors
-    pub fn finish<'w, 's>(
-        self,
-        commands: &mut Commands<'w, 's>,
-        meshes: &mut ResMut<Assets<Mesh>>,
-        materials: &mut ResMut<Assets<StandardMaterial>>,
-    ) {
-        self.walls.iter().for_each(|wall| {
-            wall.build(commands, meshes, materials);
-        });
-        self.floors.iter().for_each(|floor| {
-            floor.build(commands, meshes, materials);
-        });
-    }
+/// Interactable point used to calculate if the player is close enough to an
+/// object to interact with it
+#[derive(Clone, Copy, Component)]
+pub struct Interactable {
+    /// Point of the object in 2D space
+    pub point: Vec2,
 }
 
-const WALL_HEIGHT: f32 = 3.7;
+#[derive(Component)]
+pub struct InteractText;
 
-/// Structure containing all data needed for a wall
-struct WallBuilder {
-    /// If this wall has collision
-    collision: bool,
-    /// Height offset of the wall
-    h_off: f32,
-    /// Height of the wall
-    height: f32,
-    /// Texture of the wall
-    texture: Option<Handle<Image>>,
-    /// Color of the wall
-    color: Color,
-    /// Where the wall begins
-    from: Vec2,
-    /// Where the wall ends
-    to: Vec2,
-    /// How many times to repeat the applied texture in the X coordinate
-    tiles_wide: f32,
-    /// How many times to repeat the applied texture in the Y coordinate
-    tiles_tall: f32,
-    /// Wether or not to enable transparency
-    transparent: bool,
-    /// What side to cull, optional
-    cull: Option<Face>,
-}
-
-/// A rectangle floor
-struct FloorBuilder {
-    /// Position that the rectangle begins from
-    from: Vec2,
-    /// Position that the rectangle ends at
-    to: Vec2,
-    /// Texture of the floor, if any
-    texture: Option<Handle<Image>>,
-    /// Color of the floor
-    color: Color,
-    /// Height offset of the floor
-    height: f32,
-    /// How many times to repeat the applied texture in the X coordinate
-    tiles_wide: f32,
-    /// How many times to repeat the applied texture in the Y coordinate
-    tiles_tall: f32,
-    /// What side to cull while rendering
-    cull: Option<Face>,
-}
-
-impl FloorBuilder {
-    /// Create a new wall with height of 1, collision enabled, and untextured gray
-    pub fn new(
-        from: (impl Into<f32>, impl Into<f32>),
-        to: (impl Into<f32>, impl Into<f32>),
-    ) -> Self {
-        let from = Vec2::new(from.0.into(), from.1.into());
-        let to = Vec2::new(to.0.into(), to.1.into());
-        Self {
-            height: 0.,
-            texture: None,
-            color: Color::default() * 0.7,
-            from,
-            to,
-            tiles_wide: 1.,
-            tiles_tall: 1.,
-            cull: None,
-        }
-    }
-    
-    /// Set what side to cull while rendering
-    pub fn with_cull(mut self, cull: Face) -> Self {
-        self.cull = Some(cull);
-        self
-    }
-    
-    /// Set the brightness of this floor's texture
-    pub fn with_brightness(self, brightness: f32) -> Self {
-        self.with_color(Color::rgb(brightness, brightness, brightness))
-    }
-
-    /// Set how many times to repeat the applied texture in X and Y coordinates
-    pub fn with_tiles(mut self, width: f32, height: f32) -> Self {
-        self.tiles_wide = width;
-        self.tiles_tall = height;
-        self
-    }
-
-    /// Calculate texture repetitions based on size of the floor
-    pub fn autotile(mut self) -> Self {
-        self.tiles_wide = (self.from - self.to).x.abs() / 2.;
-        self.tiles_tall = (self.from - self.to).y.abs() / 2.;
-        self
-    }
-
-    /// Add a texture to this wall
-    pub fn with_texture(mut self, texture: Handle<Image>) -> Self {
-        self.texture = Some(texture);
-        self
-    }
-
-    /// Add a height offset from the ground
-    pub fn with_offset(mut self, off: f32) -> Self {
-        self.height = off;
-        self
-    }
-
-    /// Set the color of this wall
-    pub fn with_color(mut self, color: Color) -> Self {
-        self.color = color;
-        self
-    }
-
-    /// Add the wall to the scene
-    pub fn build<'w, 's, 'a>(
-        &self,
-        commands: &'a mut Commands<'w, 's>,
-        meshes: &mut ResMut<Assets<Mesh>>,
-        materials: &mut ResMut<Assets<StandardMaterial>>,
-    ) -> EntityCommands<'w, 's, 'a> {
-        let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-        let verts = vec![
-            [self.from.x, self.height, self.from.y], //bl
-            [self.to.x, self.height, self.from.y],   //br
-            [self.from.x, self.height, self.to.y],   //tl
-            [self.to.x, self.height, self.to.y],     //tr
-        ];
-
-
-        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0., 0., 1.]; 4]);
-        mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, verts);
-        mesh.insert_attribute(
-            Mesh::ATTRIBUTE_UV_0,
-            vec![
-                [0., 0.],
-                [self.tiles_wide, 0.],
-                [0., self.tiles_tall],
-                [self.tiles_wide, self.tiles_tall],
-            ],
-        );
-
-        mesh.set_indices(Some(Indices::U16(vec![0, 2, 1, 3, 1, 2])));
-
-        let command = commands.spawn_bundle(PbrBundle {
-            mesh: meshes.add(mesh.clone()),
-            material: materials.add(StandardMaterial {
-                base_color: self.color,
-                base_color_texture: self.texture.clone(),
-                cull_mode: self.cull,
-                unlit: true,
-                ..Default::default()
-            }),
-            ..default()
-        });
-
-        command
-    }
-}
-
-impl WallBuilder {
-    /// Create a new wall with height of 1, collision enabled, and untextured gray
-    pub fn new(
-        from: (impl Into<f32>, impl Into<f32>),
-        to: (impl Into<f32>, impl Into<f32>),
-    ) -> Self {
-        let from = Vec2::new(from.0.into(), from.1.into());
-        let to = Vec2::new(to.0.into(), to.1.into());
-        let color = 0.4 + 0.2 * ((from - to).angle_between(Vec2::Y) / (std::f32::consts::PI * 2.)).abs();
-        Self {
-            collision: true,
-            h_off: 0.,
-            height: WALL_HEIGHT,
-            texture: None,
-            color: Color::rgb(color, color, color),
-            from,
-            to,
-            tiles_tall: 1.,
-            tiles_wide: 1.,
-            transparent: false,
-            cull: None,
-        }
-    }
-    
-    /// Set the cull mode of this wall
-    pub fn with_cull(mut self, cull: Face) -> Self {
-        self.cull = Some(cull);
-        self
-    }
-
-    /// Set the amount of times to repeat the applied texture
-    pub fn with_tiles(mut self, wide: f32, tall: f32) -> Self {
-        self.tiles_wide = wide;
-        self.tiles_tall = tall;
-        self
-    }
-
-    /// Calculate how many times to repeat the tile based on height and length of the wall
-    pub fn autotile(mut self) -> Self {
-        self.tiles_wide = self.from.distance(self.to);
-        self.tiles_tall = self.height;
-        self
-    }
-
-    /// Calculate how many times to repeat the texture based on length, while always using one
-    /// tile's height for the height
-    pub fn autotile_len(mut self) -> Self {
-        self.tiles_wide = self.from.distance(self.to) / 2.;
-        self
-    }
-
-    /// Add a texture to this wall
-    pub fn with_texture(mut self, texture: Handle<Image>) -> Self {
-        self.texture = Some(texture);
-        let color = 0.6
-            + 0.2 * ((self.from - self.to).angle_between(Vec2::Y) / (std::f32::consts::PI * 2.)).abs();
-
-        self.color = Color::WHITE * color;
-        self
-    }
-
-    /// Add a height offset from the ground
-    pub fn with_offset(mut self, off: f32) -> Self {
-        self.h_off = off;
-        self
-    }
-
-    /// Set the height of this wall
-    pub fn with_height(mut self, height: f32) -> Self {
-        self.height = height;
-        self
-    }
-
-    /// Set the color of this wall
-    pub fn with_color(mut self, color: Color) -> Self {
-        self.color = color;
-        self
-    }
-
-    /// Set the collision for this object
-    pub fn with_collision(mut self, collision: bool) -> Self {
-        self.collision = collision;
-        self
-    }
-    
-    /// Enable or disable transparency for this wall's texture
-    pub fn with_transparency(mut self, transparency: bool) -> Self {
-        self.transparent = transparency;
-        self
-    }
-
-    /// Add the wall to the scene
-    pub fn build<'w, 's, 'a>(
-        &self,
-        commands: &'a mut Commands<'w, 's>,
-        meshes: &mut ResMut<Assets<Mesh>>,
-        materials: &mut ResMut<Assets<StandardMaterial>>,
-    ) -> EntityCommands<'w, 's, 'a> {
-        let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-        let verts = vec![
-            [self.from.x, self.h_off, self.from.y],               //bl
-            [self.to.x, self.h_off, self.to.y],                   //br
-            [self.from.x, self.height + self.h_off, self.from.y], //tl
-            [self.to.x, self.height + self.h_off, self.to.y],     //tr
-        ];
-
-        let direction = self.from - self.to;
-        let norm = Vec2::new(-direction.y, direction.x);
-
-        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[norm.x, 0., norm.y]; 4]);
-        mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, verts);
-        mesh.insert_attribute(
-            Mesh::ATTRIBUTE_UV_0,
-            vec![
-                [self.tiles_wide, self.tiles_tall],
-                [0., self.tiles_tall],
-                [self.tiles_wide, 0.],
-                [0., 0.],
-            ],
-        );
-
-        mesh.set_indices(Some(Indices::U16(vec![0, 2, 1, 3, 1, 2])));
-
-        let mut command = commands.spawn_bundle(PbrBundle {
-            mesh: meshes.add(mesh.clone()),
-            material: materials.add(StandardMaterial {
-                base_color: self.color,
-                base_color_texture: self.texture.clone(),
-                cull_mode: self.cull,
-                unlit: true,
-                alpha_mode: if self.transparent { AlphaMode::Blend } else { AlphaMode::Opaque },
-                ..Default::default()
-            }),
-            ..default()
-        });
-
-        if self.collision {
-            command
-                .insert(LineCollider {
-                    from: self.from,
-                    to: self.to,
-                    len: self.from.distance(self.to),
-                });
-        }
-        command
-    }
-}
 
 #[derive(Default)]
 pub struct Textures {
@@ -507,10 +225,13 @@ pub struct Textures {
     green_trimmed_wall: Handle<Image>,
     limestone_wall: Handle<Image>,
     eggshell_wall: Handle<Image>,
+    barrier: Handle<Image>,
     concrete: Handle<Image>,
     ceiling_panel: Handle<Image>,
     wood_slat_roof: Handle<Image>,
     sky: Handle<Image>,
+    tombstone: Handle<Image>,
+    protest_image: Handle<Image>,
     job_iden: Handle<Image>,
 }
 
@@ -549,4 +270,7 @@ fn load_textures(mut images: ResMut<Assets<Image>>, mut textures: ResMut<Texture
     textures.green_trimmed_wall = load(include_bytes!("../assets/green-trimmed-wall.png"));
     textures.red_tile_floor = load(include_bytes!("../assets/red-tile-floor.png"));
     textures.job_iden = load(include_bytes!("../assets/job-iden.png"));
+    textures.barrier = load(include_bytes!("../assets/barrier.png"));
+    textures.tombstone = load(include_bytes!("../assets/tombstone.png"));
+    textures.protest_image = load(include_bytes!("../assets/protest-image.png"));
 }
