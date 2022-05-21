@@ -1,3 +1,5 @@
+use bevy::window::{WindowResized, WindowCreated};
+
 use super::*;
 use super::scene::*;
 
@@ -18,38 +20,23 @@ pub fn setup(
         window.set_cursor_lock_mode(true);
         window.set_cursor_visibility(false);
     });
+    let window = windows.primary();
 
-    let tombstone_txt = commands.spawn()
-        .insert_bundle(TextBundle {
-            style: Style {
-                align_self: AlignSelf::FlexEnd,
-                position_type: PositionType::Absolute,
-                position: Rect {
-                    //bottom: Val::Px(5.0),
-                    //right: Val::Px(15.0),
-                    top: Val::Percent(50.),
-                    left: Val::Percent(50.),
-                    ..default()
-                },
-                ..default()
-            },
-            text: Text::with_section(
-                "Tombstone",
-                TextStyle {
-                    font: asset_server.load("fonts/times-new-roman.ttf"),
-                    font_size: 24.0,
-                    color: Color::WHITE,
-                },
-                TextAlignment {
-                    horizontal: HorizontalAlign::Center,
-                    ..default()
-                },
-            ),
-            ..default()
-        })
-        .insert(Visibility { is_visible: false, })
-        .id();
+    let font = asset_server.get_handle("fonts/times-new-roman.ttf");
 
+    let tombstone_txt = tombstone(
+        &mut commands,
+        window,
+        font, 
+        "Pro - Union Protestors",
+        "March 22, 2021",
+        "Lucy Nicholson",
+r#"
+Pictured are protestors in Los Angles protesting against the controversial results of the vote to unionize the Amazon fulfillment center BHM1 in Alabama. The vote ultimately 
+failed, but many suspected Amazon's attempts to manipulate the vote by sending anti-union mail to workers had succeeded.
+"#,
+        "Reuters"
+    );
 
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
 
@@ -639,7 +626,7 @@ pub fn setup(
         )
     
         .with_wall(
-            wall((g.0 + 0.01, g.1 + 2.), (g.0 + 0.01, g.1 + 2.5))
+            wall((g.0 + 0.01, g.1 + 2.5), (g.0 + 0.01, g.1 + 3.))
                 .with_texture(textures.tombstone.clone())
                 .with_cull(Face::Back)
                 .with_height(0.25)
@@ -680,14 +667,12 @@ pub fn setup(
     commands.spawn_bundle(UiCameraBundle::default());
 
     // Text with one section
-    let interact_text = commands
+    commands
         .spawn_bundle(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
                 position: Rect {
-                    //bottom: Val::Px(5.0),
-                    //right: Val::Px(15.0),
                     top: Val::Percent(50.),
                     left: Val::Percent(50.),
                     ..default()
@@ -709,14 +694,78 @@ pub fn setup(
             ..default()
         })
         .insert(Visibility { is_visible: true, })
-        .insert(InteractText)
-        .id();
-
-        commands.spawn()
-        .insert(Tombstone {
-            text: tombstone_txt,
-        })
-        .insert(Interactable { point: Vec2::new(g.0, g.1 + 2.25), });
-
+        .insert(InteractText);
 }
 
+/// Create a new tombstone with all required sections
+pub fn tombstone(
+    commands: &mut Commands,
+    window: &Window,
+    font: Handle<Font>,
+    title: &str,
+    date: &str,
+    creator: &str,
+    summary: &str,
+    source: &str,
+) -> Entity {
+    let text_color = Color::rgb(0.2, 0.2, 0.2);
+
+    commands.spawn_bundle(TextBundle {
+        style: Style {
+            align_self: AlignSelf::Center,
+            position_type: PositionType::Absolute,
+            position: Rect {
+                top: Val::Percent(50.),
+                left: Val::Percent(5.),
+                right: Val::Percent(50.),
+                ..default()
+            },
+            align_items: AlignItems::FlexStart,
+            align_content: AlignContent::FlexEnd,
+            flex_wrap: FlexWrap::Wrap,
+            max_size: Size::new(Val::Px(window.width() - 75.), Val::Px(window.height())),
+            ..default()
+        },
+        text: Text {
+            sections: vec![
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 48., color:  text_color},
+                    value: format!("{}, {}\n\n", title, date),
+                },
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 32., color: text_color},
+                    value: format!("{}\n\n", creator),
+                },
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 24., color: text_color},
+                    value: format!("{}\n", summary),
+                },
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 12., color: text_color},
+                    value: source.to_owned(),
+                }
+            ],
+            alignment: TextAlignment { vertical: VerticalAlign::Top, horizontal: HorizontalAlign::Left }
+        },
+        ..default()
+    })
+    .insert(Visibility { is_visible: false})
+    .id()
+}
+
+/// System to update text maximum sizes based on window size, used because maximum size in 
+/// percents doesn't work in Bevy 0.7
+pub fn set_text_sizes(
+    mut resized: EventReader<WindowResized>,
+    windows: Res<Windows>,
+    mut texts: Query<&mut Style>,
+) {
+    for event in resized.iter() {
+        if event.width <= 50. {
+            return;
+        }
+        for mut text in texts.iter_mut() {
+            text.max_size = Size::new(Val::Px(event.width - 50.), Val::Px(event.height));
+        }
+    }
+}

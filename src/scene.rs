@@ -359,10 +359,10 @@ impl WallBuilder {
         }
         if let Some(text) = self.txt {
             command
-                .insert(Tombstone {
+                .insert(Readable {
                     text,
-                })
-                .insert(Interactable { point: (self.from + self.to) / 2.});
+                    point: (self.from + self.to) / 2.
+                });
         }
 
         command

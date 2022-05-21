@@ -32,6 +32,7 @@ fn main() {
         .add_startup_system(load_textures.before(setup::setup))
         .add_startup_system(setup::setup)
         .add_system(input)
+        .add_system(setup::set_text_sizes)
         .run();
 }
 
@@ -45,7 +46,7 @@ fn input(
     mut players: Query<(&mut LookTransform, &mut Player, &mut Smoother)>,
     mut windows: ResMut<Windows>,
     objects: Query<&LineCollider>,
-    tombstones: Query<(&Tombstone, &Interactable), Without<InteractText>>,
+    tombstones: Query<&Readable, Without<InteractText>>,
     mut text: Query<&mut Visibility, Without<InteractText>>,
     mut interact_text: Query<(&mut Visibility, &mut Text), With<InteractText>>,
 ) {
@@ -135,11 +136,11 @@ fn input(
             //let target2d = Vec2::new(camera.target.x, camera.target.z);
 
             const INTERACT_RADIUS: f32 = 2.5;
-            for (tombstone, interactable) in tombstones.iter() {
-                if interactable.point.distance(pos2d) < INTERACT_RADIUS {
+            for readable in tombstones.iter() {
+                if readable.point.distance(pos2d) < INTERACT_RADIUS {
                     if kb.just_released(KeyCode::E) {
-                        text.get_mut(tombstone.text).unwrap().is_visible = true; 
-                        player.viewed_text = Some(tombstone.text);
+                        text.get_mut(readable.text).unwrap().is_visible = true; 
+                        player.viewed_text = Some(readable.text);
                         camera.eye = Vec3::new(4., 1., 5.5);
                         camera.target = Vec3::new(4., 1., 6.);
                         *smoother = Smoother::new(0.);
@@ -195,16 +196,10 @@ pub struct LineCollider {
 
 /// Tombtone with text about a museum piece 
 #[derive(Component)]
-pub struct Tombstone {
+pub struct Readable {
     /// Description of the museum piece containing the Text and Visible components
     pub text: Entity,
-}
-
-/// Interactable point used to calculate if the player is close enough to an
-/// object to interact with it
-#[derive(Clone, Copy, Component)]
-pub struct Interactable {
-    /// Point of the object in 2D space
+    /// Position of the interactable object
     pub point: Vec2,
 }
 
