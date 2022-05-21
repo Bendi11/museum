@@ -227,6 +227,7 @@ pub struct Textures {
     sky: Handle<Image>,
     tombstone: Handle<Image>,
     protest_image: Handle<Image>,
+    art: Handle<Image>,
     job_iden: Handle<Image>,
 }
 
@@ -268,4 +269,5 @@ fn load_textures(mut images: ResMut<Assets<Image>>, mut textures: ResMut<Texture
     textures.barrier = load(include_bytes!("../assets/barrier.png"));
     textures.tombstone = load(include_bytes!("../assets/tombstone.png"));
     textures.protest_image = load(include_bytes!("../assets/protest-image.png"));
+    textures.art = load(include_bytes!("../assets/art.png"));
 }

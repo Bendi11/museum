@@ -24,10 +24,10 @@ pub fn setup(
 
     let font = asset_server.get_handle("fonts/times-new-roman.ttf");
 
-    let tombstone_txt = tombstone(
+    let protest_image_txt = tombstone(
         &mut commands,
         window,
-        font, 
+        font.clone(), 
         "Pro - Union Protestors",
         "March 22, 2021",
         "Lucy Nicholson",
@@ -36,6 +36,19 @@ Pictured are protestors in Los Angles protesting against the controversial resul
 failed, but many suspected Amazon's attempts to manipulate the vote by sending anti-union mail to workers had succeeded.
 "#,
         "Reuters"
+    );
+
+    let art_txt = tombstone(
+        &mut commands,
+        window,
+        font,
+        "Amazon Labor Union",
+        "April 3, 2022",
+        "Randall Enos",
+r#"
+Depicted is a figure wearing a shirt labelled 'Smalls', referring to a labor union leader named Chris Smalls, throwing an arrow stylized to be similar to Amazon's logo at a Goliathan figure. The art shows the unionization effort as a strike from the working class at the goliathan giant of Amazon.
+"#,
+        "Cagle Cartoons"
     );
 
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
@@ -632,7 +645,7 @@ failed, but many suspected Amazon's attempts to manipulate the vote by sending a
                 .with_height(0.25)
                 .with_offset(WALL_HEIGHT / 2. - 0.75)
                 .with_transparency(false)
-                .with_text(tombstone_txt)
+                .with_text(protest_image_txt)
                 .with_collision(false)
         )
         .with_wall(
@@ -641,6 +654,23 @@ failed, but many suspected Amazon's attempts to manipulate the vote by sending a
                 .with_cull(Face::Back)
                 .with_height(2.25)
                 .with_offset(WALL_HEIGHT / 2. - 0.7)
+                .with_collision(false)
+        )
+        .with_wall(
+            wall((m.0 - 0.01, m.1 + 1.), (m.0 - 0.01, m.1 + 4.))
+                .with_texture(textures.art.clone())
+                .with_cull(Face::Front)
+                .with_height(1.98)
+                .with_offset(WALL_HEIGHT / 2. - 0.9)
+                .with_collision(false)
+        )
+        .with_wall(
+            wall((m.0 - 0.01, m.1 + 4.5), (m.0 - 0.01, m.1 + 5.))
+                .with_texture(textures.tombstone.clone())
+                .with_cull(Face::Front)
+                .with_height(0.25)
+                .with_offset(WALL_HEIGHT / 2. - 0.5)
+                .with_text(art_txt)
                 .with_collision(false)
         )
         
@@ -712,18 +742,17 @@ pub fn tombstone(
 
     commands.spawn_bundle(TextBundle {
         style: Style {
-            align_self: AlignSelf::Center,
+            //align_self: AlignSelf::Center,
             position_type: PositionType::Absolute,
             position: Rect {
-                top: Val::Percent(50.),
+                top: Val::Percent(35.),
                 left: Val::Percent(5.),
-                right: Val::Percent(50.),
                 ..default()
             },
             align_items: AlignItems::FlexStart,
             align_content: AlignContent::FlexEnd,
             flex_wrap: FlexWrap::Wrap,
-            max_size: Size::new(Val::Px(window.width() - 75.), Val::Px(window.height())),
+            max_size: Size::new(Val::Px(window.width() - (window.width() * 0.2)), Val::Px(window.height())),
             ..default()
         },
         text: Text {
@@ -757,7 +786,6 @@ pub fn tombstone(
 /// percents doesn't work in Bevy 0.7
 pub fn set_text_sizes(
     mut resized: EventReader<WindowResized>,
-    windows: Res<Windows>,
     mut texts: Query<&mut Style>,
 ) {
     for event in resized.iter() {
@@ -765,7 +793,7 @@ pub fn set_text_sizes(
             return;
         }
         for mut text in texts.iter_mut() {
-            text.max_size = Size::new(Val::Px(event.width - 50.), Val::Px(event.height));
+            text.max_size = Size::new(Val::Px(event.width - (event.width * 0.2)), Val::Px(event.height));
         }
     }
 }
