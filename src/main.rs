@@ -49,8 +49,9 @@ fn input(
     tombstones: Query<&Readable, Without<InteractText>>,
     mut text: Query<&mut Visibility, Without<InteractText>>,
     mut interact_text: Query<(&mut Visibility, &mut Text), With<InteractText>>,
+    time: Res<Time>,
 ) {
-    const SENSITIVITY: f32 = 0.01;
+    let sensitivity = 0.1 * time.delta_seconds();
     for (mut camera, mut player, mut smoother) in players.iter_mut() {
         if let Some(txt) = player.viewed_text { 
             if kb.just_released(KeyCode::E) {
@@ -71,8 +72,8 @@ fn input(
             let rot_z = yaw_rot * Vec3::Z;
 
             for event in mouse.iter() {
-                angles.add_pitch(-event.delta.y * SENSITIVITY);
-                angles.add_yaw(-event.delta.x * SENSITIVITY);
+                angles.add_pitch(-event.delta.y * sensitivity);
+                angles.add_yaw(-event.delta.x * sensitivity);
             }
 
             if angles.get_pitch() == 0. {
@@ -82,19 +83,19 @@ fn input(
                 angles.set_yaw(0.01);
             }
 
-            const MOVESPEED: f32 = 0.1;
+            let movespeed = 5.5 * time.delta_seconds();
             let mut movement = Vec2::default();
             
             if kb.pressed(KeyCode::W) {
-                movement.y += MOVESPEED;
+                movement.y += movespeed;
             } else if kb.pressed(KeyCode::S) {
-                movement.y -= MOVESPEED;
+                movement.y -= movespeed;
             }
 
             if kb.pressed(KeyCode::D) {
-                movement.x -= MOVESPEED;
+                movement.x -= movespeed;
             } else if kb.pressed(KeyCode::A) {
-                movement.x += MOVESPEED;
+                movement.x += movespeed;
             }
             let speed = movement.length();
             let movement_3d = Vec3::new(movement.x, 0., movement.y);

@@ -32,8 +32,7 @@ pub fn setup(
         "March 22, 2021",
         "Lucy Nicholson",
 r#"
-Pictured are protestors in Los Angles protesting against the controversial results of the vote to unionize the Amazon fulfillment center BHM1 in Alabama. The vote ultimately 
-failed, but many suspected Amazon's attempts to manipulate the vote by sending anti-union mail to workers had succeeded.
+Pictured are people in Los Angles protesting against the controversial results of a failed attempt to unionize the Amazon fulfillment center BHM1 in Alabama. Many were angered by Amazon's distribution of anti-union flyers and letters to the workers at BHM1, arguing that it amounted to modern day union busting.
 "#,
         "Reuters"
     );
@@ -46,7 +45,7 @@ failed, but many suspected Amazon's attempts to manipulate the vote by sending a
         "April 3, 2022",
         "Randall Enos",
 r#"
-Depicted is a figure wearing a shirt labelled 'Smalls', referring to a labor union leader named Chris Smalls, throwing an arrow stylized to be similar to Amazon's logo at a Goliathan figure. The art shows the unionization effort as a strike from the working class at the goliathan giant of Amazon.
+Depicted is a figure wearing a shirt labelled 'Smalls', referring to labor union leader Chris Smalls, throwing an arrow stylized to be similar to Amazon's logo at a Goliathan figure. The art shows the unionization effort as a strike from the working class against the goliathan giant of Amazon.
 "#,
         "Cagle Cartoons"
     );
@@ -672,6 +671,7 @@ Depicted is a figure wearing a shirt labelled 'Smalls', referring to a labor uni
                 .with_offset(WALL_HEIGHT / 2. - 0.5)
                 .with_text(art_txt)
                 .with_collision(false)
+                .with_tiles(-1., 1.)
         )
         
         .finish(&mut commands, &mut meshes, &mut materials);
@@ -770,7 +770,7 @@ pub fn tombstone(
                     value: format!("{}\n", summary),
                 },
                 TextSection {
-                    style: TextStyle { font: font.clone(), font_size: 12., color: text_color},
+                    style: TextStyle { font: font.clone(), font_size: 16., color: text_color},
                     value: source.to_owned(),
                 }
             ],
@@ -789,9 +789,6 @@ pub fn set_text_sizes(
     mut texts: Query<&mut Style>,
 ) {
     for event in resized.iter() {
-        if event.width <= 50. {
-            return;
-        }
         for mut text in texts.iter_mut() {
             text.max_size = Size::new(Val::Px(event.width - (event.width * 0.2)), Val::Px(event.height));
         }
