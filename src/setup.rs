@@ -10,7 +10,7 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut light: ResMut<AmbientLight>,
-    textures: Res<Textures>,
+    textures: Res<GlobalResources>,
     asset_server: Res<AssetServer>,
 ) {
     light.color = Color::WHITE;
@@ -32,7 +32,7 @@ pub fn setup(
         "March 22, 2021",
         "Lucy Nicholson",
 r#"
-Pictured are people in Los Angles protesting against the controversial results of a failed attempt to unionize the Amazon fulfillment center BHM1 in Alabama. Many were angered by Amazon's distribution of anti-union flyers and letters to the workers at BHM1, arguing that it amounted to modern day union busting.
+Pictured are people in Los Angles protesting against the controversial results of a failed attempt to unionize the Amazon fulfillment center BHM1 in Alabama. Many were angered by Amazon's distribution of anti-union flyers to the workers and attempts to disrupt the vote by confusing uninformed voters at BHM1, arguing that it amounted to modern day union busting. In response to the Amazon's alleged interference in the election, the warehouse was granted another union election by the National Labor Relations Board. 
 "#,
         "Nicholson, Lucy. “People Protest in Support of the Unionizing Efforts of the Alabama Amazon Workers, in Los Angeles, California, March 22, 2021.” How Amazon Fought the Union Drive in Alabama, CNBC, 16 Apr. 2021, https://www.cnbc.com/2021/04/16/how-amazon-fought-the-union-drive-in-alabama.html."
     );
@@ -45,7 +45,7 @@ Pictured are people in Los Angles protesting against the controversial results o
         "April 3, 2022",
         "Randall Enos",
 r#"
-Depicted is a figure wearing a shirt labelled 'Smalls', referring to labor union leader Chris Smalls, throwing an arrow stylized to be similar to Amazon's logo at a Goliathan figure. The art shows the unionization effort as a strike from the working class against the goliathan giant of Amazon.
+Depicted is a figure wearing a shirt labelled 'Smalls', referring to labor union leader Chris Smalls attacking a Goliathan figure. The upside-down orange arrow holds special significance as a pro-union symbol, representing Amazon's smiley face arrow turned into a frown. This cartoon shows the unionization effort as a strike from the working class against the goliathan giant of Amazon.
 "#,
         "Enos, Randall. “Amazon Labor Union.” Cagle Cartoons, 3 Apr. 2022, https://caglecartoons.com/sku/261682. "
     );

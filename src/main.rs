@@ -12,7 +12,7 @@ use bevy::{
         mesh::{Indices, PrimitiveTopology},
         render_resource::{AddressMode, FilterMode, Face},
         texture::{CompressedImageFormats, ImageType},
-    },
+    }, audio::AudioSink,
 };
 use smooth_bevy_cameras::{
     LookAngles, LookTransform, LookTransformBundle, LookTransformPlugin, Smoother,
@@ -25,11 +25,11 @@ fn main() {
             present_mode: bevy::window::PresentMode::Fifo,
             ..Default::default()
         })
-        .init_resource::<Textures>()
+        .init_resource::<GlobalResources>()
         //.insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(LookTransformPlugin)
-        .add_startup_system(load_textures.before(setup::setup))
+        .add_startup_system(load_resources.before(setup::setup))
         .add_startup_system(setup::setup)
         .add_system(input)
         .add_system(setup::set_text_sizes)
@@ -46,16 +46,17 @@ fn input(
     mut players: Query<(&mut LookTransform, &mut Player, &mut Smoother)>,
     mut windows: ResMut<Windows>,
     objects: Query<&LineCollider>,
-    tombstones: Query<&Readable, Without<InteractText>>,
-    mut text: Query<&mut Visibility, Without<InteractText>>,
+    tombstones: Query<&Interactable, Without<InteractText>>,
+    mut texts: Query<&mut Visibility, Without<InteractText>>,
     mut interact_text: Query<(&mut Visibility, &mut Text), With<InteractText>>,
     time: Res<Time>,
+    sinks: Res<Assets<AudioSink>>,
 ) {
     let sensitivity = 0.1 * time.delta_seconds();
     for (mut camera, mut player, mut smoother) in players.iter_mut() {
         if let Some(txt) = player.viewed_text { 
             if kb.just_released(KeyCode::E) {
-                text.get_mut(txt).unwrap().is_visible = false;
+                texts.get_mut(txt).unwrap().is_visible = false;
                 player.viewed_text = None;
                 camera.eye = player.old_eye;
                 camera.target = player.old_target;
@@ -102,9 +103,10 @@ fn input(
 
             let mut pos = camera.eye + (movement_3d.x * rot_x + movement_3d.y * rot_y + movement_3d.z * rot_z);
             let mut pos2d = Vec2::new(pos.x, pos.z);
+            const BOB_AMOUNT: f32 = 0.05;
+            const BOB_SPEED: f32 = 0.2;
+
             if movement != Vec2::default() {
-                const BOB_AMOUNT: f32 = 0.05;
-                const BOB_SPEED: f32 = 0.2;
                 match player.up {
                     true => match player.cam_height >= BOB_AMOUNT {
                         true => player.up = false,
@@ -115,8 +117,7 @@ fn input(
                         false => player.cam_height -= BOB_SPEED * time.delta_seconds(),
                     }
                 }
-                pos.y = PLAYER_HEIGHT + player.cam_height;
-
+                
                 for object in objects.iter() {
                     let dot = ( ( (pos2d.x - object.from.x) * (object.to.x - object.from.x)) + ((pos2d.y - object.from.y) * (object.to.y - object.from.y))) / (object.len.powi(2));
                     let closest = Vec2::new(
@@ -132,12 +133,18 @@ fn input(
                         let collision_distance = closest.distance(pos2d);
                         if collision_distance <= PLAYER_RADIUS {
                             let unit = (closest - pos2d).normalize();
-                            pos2d -= unit * speed;//collision_distance;
+                            pos2d -= unit * speed;
                         }
                     }
                 }
+            } else {
+                if player.cam_height.abs() >= 0.01 {
+                    player.cam_height -= BOB_SPEED * player.cam_height.signum() * time.delta_seconds();
+                }
             }
+            
             pos.x = pos2d.x;
+            pos.y = PLAYER_HEIGHT + player.cam_height;
             pos.z = pos2d.y;
             
             angles.assert_not_looking_up();
@@ -146,21 +153,43 @@ fn input(
             player.old_eye = camera.eye;
             player.old_target = camera.target;
             
-            let (mut interact_visibility, _) = interact_text.get_single_mut().unwrap();
+            let (mut interact_visibility, mut interact_text) = interact_text.get_single_mut().unwrap();
             interact_visibility.is_visible = false;
-            //let target2d = Vec2::new(camera.target.x, camera.target.z);
 
             const INTERACT_RADIUS: f32 = 2.5;
             for readable in tombstones.iter() {
                 if readable.point.distance(pos2d) < INTERACT_RADIUS {
                     if kb.just_released(KeyCode::E) {
-                        text.get_mut(readable.text).unwrap().is_visible = true; 
-                        player.viewed_text = Some(readable.text);
-                        camera.eye = Vec3::new(4., 1., 5.5);
-                        camera.target = Vec3::new(4., 1., 6.);
-                        *smoother = Smoother::new(0.);
+                        match &readable.action {
+                            InteractableAction::Tombstone { text } => {
+                                texts.get_mut(*text).unwrap().is_visible = true; 
+                                player.viewed_text = Some(*text);
+                                camera.eye = Vec3::new(4., 1., 5.5);
+                                camera.target = Vec3::new(4., 1., 6.);
+                                *smoother = Smoother::new(0.);
+                            },
+                            InteractableAction::Audio { sink } => {
+                                let sink = sinks.get(sink).unwrap();
+                                match sink.is_paused() {
+                                    true => {
+                                        for (_, other_audio) in sinks.iter() {
+                                            other_audio.pause();
+                                        }
+                                        sink.play()
+                                    },
+                                    false => sink.pause(),
+                                }
+                            },
+                        }
                     } else {
                         interact_visibility.is_visible = true;
+                        interact_text.sections[0].value = match &readable.action {
+                            InteractableAction::Tombstone { .. } => "[e] Read",
+                            InteractableAction::Audio { sink } => match sinks.get(sink).unwrap().is_paused() {
+                                true => "[e] Play Audio",
+                                false => "[e] Stop Audio",
+                            },
+                        }.to_owned();
                     }
                     break;
                 }
@@ -214,13 +243,21 @@ pub struct LineCollider {
     len: f32,
 }
 
-/// Tombtone with text about a museum piece 
+/// Action that can be taken when interacting with something
+pub enum InteractableAction {
+    Tombstone {
+        text: Entity,
+    },
+    Audio {
+        sink: Handle<AudioSink>,
+    }
+}
+
+/// Any interactable object
 #[derive(Component)]
-pub struct Readable {
-    /// Description of the museum piece containing the Text and Visible components
-    pub text: Entity,
-    /// Position of the interactable object
+pub struct Interactable {
     pub point: Vec2,
+    pub action: InteractableAction,
 }
 
 #[derive(Component)]
@@ -228,7 +265,7 @@ pub struct InteractText;
 
 
 #[derive(Default)]
-pub struct Textures {
+pub struct GlobalResources {
     birch_floor: Handle<Image>,
     oak_floor: Handle<Image>,
     flagstone_floor: Handle<Image>,
@@ -248,11 +285,15 @@ pub struct Textures {
     tombstone: Handle<Image>,
     protest_image: Handle<Image>,
     art: Handle<Image>,
+    mlk: Handle<Image>,
     job_iden: Handle<Image>,
 }
 
 /// Load all textures and set their repeat mode
-fn load_textures(mut images: ResMut<Assets<Image>>, mut textures: ResMut<Textures>) {
+fn load_resources(
+    mut images: ResMut<Assets<Image>>,
+    mut resources: ResMut<GlobalResources>
+) {
     let mut load = |buf: &[u8]| {
         let mut image = Image::from_buffer(
             buf,
@@ -270,24 +311,25 @@ fn load_textures(mut images: ResMut<Assets<Image>>, mut textures: ResMut<Texture
         images.add(image)
     };
 
-    textures.birch_floor = load(include_bytes!("../assets/birch-floor.png"));
-    textures.blue_trimmed_wall = load(include_bytes!("../assets/blue-trimmed-wall.png"));
-    textures.red_trimmed_wall = load(include_bytes!("../assets/red-trimmed-wall.png"));
-    textures.ceiling_panel = load(include_bytes!("../assets/ceiling-panel.png"));
-    textures.sky = load(include_bytes!("../assets/sky.png"));
-    textures.flagstone_floor = load(include_bytes!("../assets/flagstone-floor.png"));
-    textures.limestone_wall = load(include_bytes!("../assets/limestone-wall.png"));
-    textures.wood_slat_roof = load(include_bytes!("../assets/wood-slat-roof.png"));
-    textures.eggshell_wall = load(include_bytes!("../assets/eggshell-wall.png"));
-    textures.linoleum_floor = load(include_bytes!("../assets/linoleum-floor.png"));
-    textures.concrete = load(include_bytes!("../assets/concrete.png"));
-    textures.oak_floor = load(include_bytes!("../assets/oak-floor.png"));
-    textures.tile_floor = load(include_bytes!("../assets/tile-floor.png"));
-    textures.green_trimmed_wall = load(include_bytes!("../assets/green-trimmed-wall.png"));
-    textures.red_tile_floor = load(include_bytes!("../assets/red-tile-floor.png"));
-    textures.job_iden = load(include_bytes!("../assets/job-iden.png"));
-    textures.barrier = load(include_bytes!("../assets/barrier.png"));
-    textures.tombstone = load(include_bytes!("../assets/tombstone.png"));
-    textures.protest_image = load(include_bytes!("../assets/protest-image.png"));
-    textures.art = load(include_bytes!("../assets/art.png"));
+    resources.birch_floor = load(include_bytes!("../assets/birch-floor.png"));
+    resources.blue_trimmed_wall = load(include_bytes!("../assets/blue-trimmed-wall.png"));
+    resources.red_trimmed_wall = load(include_bytes!("../assets/red-trimmed-wall.png"));
+    resources.ceiling_panel = load(include_bytes!("../assets/ceiling-panel.png"));
+    resources.sky = load(include_bytes!("../assets/sky.png"));
+    resources.flagstone_floor = load(include_bytes!("../assets/flagstone-floor.png"));
+    resources.limestone_wall = load(include_bytes!("../assets/limestone-wall.png"));
+    resources.wood_slat_roof = load(include_bytes!("../assets/wood-slat-roof.png"));
+    resources.eggshell_wall = load(include_bytes!("../assets/eggshell-wall.png"));
+    resources.linoleum_floor = load(include_bytes!("../assets/linoleum-floor.png"));
+    resources.concrete = load(include_bytes!("../assets/concrete.png"));
+    resources.oak_floor = load(include_bytes!("../assets/oak-floor.png"));
+    resources.tile_floor = load(include_bytes!("../assets/tile-floor.png"));
+    resources.green_trimmed_wall = load(include_bytes!("../assets/green-trimmed-wall.png"));
+    resources.red_tile_floor = load(include_bytes!("../assets/red-tile-floor.png"));
+    resources.job_iden = load(include_bytes!("../assets/job-iden.png"));
+    resources.barrier = load(include_bytes!("../assets/barrier.png"));
+    resources.tombstone = load(include_bytes!("../assets/tombstone.png"));
+    resources.protest_image = load(include_bytes!("../assets/protest-image.png"));
+    resources.art = load(include_bytes!("../assets/art.png"));
+    resources.mlk = load(include_bytes!("../assets/martin-luther-king-jr.png"));
 }
