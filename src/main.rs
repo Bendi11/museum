@@ -11,7 +11,7 @@ use bevy::{
     render::{
         mesh::{Indices, PrimitiveTopology},
         render_resource::{AddressMode, FilterMode, Face},
-        texture::{CompressedImageFormats, ImageType}, render_phase::Draw,
+        texture::{CompressedImageFormats, ImageType},
     },
 };
 use smooth_bevy_cameras::{
@@ -63,7 +63,7 @@ fn input(
             }
             break
         }
-
+        
         if let Some(dir) = camera.look_direction() {
             let mut angles = LookAngles::from_vector(dir);
             let yaw_rot = Quat::from_axis_angle(Vec3::Y, angles.get_yaw());
@@ -103,6 +103,20 @@ fn input(
             let mut pos = camera.eye + (movement_3d.x * rot_x + movement_3d.y * rot_y + movement_3d.z * rot_z);
             let mut pos2d = Vec2::new(pos.x, pos.z);
             if movement != Vec2::default() {
+                const BOB_AMOUNT: f32 = 0.05;
+                const BOB_SPEED: f32 = 0.2;
+                match player.up {
+                    true => match player.cam_height >= BOB_AMOUNT {
+                        true => player.up = false,
+                        false => player.cam_height += BOB_SPEED * time.delta_seconds(),
+                    },
+                    false => match player.cam_height <= -BOB_AMOUNT {
+                        true => player.up = true,
+                        false => player.cam_height -= BOB_SPEED * time.delta_seconds(),
+                    }
+                }
+                pos.y = PLAYER_HEIGHT + player.cam_height;
+
                 for object in objects.iter() {
                     let dot = ( ( (pos2d.x - object.from.x) * (object.to.x - object.from.x)) + ((pos2d.y - object.from.y) * (object.to.y - object.from.y))) / (object.len.powi(2));
                     let closest = Vec2::new(
@@ -170,6 +184,7 @@ pub struct GlobalState {
 }
 
 const PLAYER_RADIUS: f32 = 0.32;
+const PLAYER_HEIGHT: f32 = 1.25;
 
 /// Marker component specifying that a collision object is controlled with the keyboard and mouse
 #[derive(Component, Default)]
@@ -181,6 +196,10 @@ struct Player {
     old_eye: Vec3,
     /// Used to restore state after exiting the read dialogue
     old_target: Vec3,
+    /// Camera offset used to add head bobbing
+    cam_height: f32,
+    /// If head bob is travelling up or down
+    up: bool,
 }
 
 

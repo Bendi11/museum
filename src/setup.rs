@@ -1,4 +1,4 @@
-use bevy::window::{WindowResized, WindowCreated};
+use bevy::window::WindowResized;
 
 use super::*;
 use super::scene::*;
@@ -34,7 +34,7 @@ pub fn setup(
 r#"
 Pictured are people in Los Angles protesting against the controversial results of a failed attempt to unionize the Amazon fulfillment center BHM1 in Alabama. Many were angered by Amazon's distribution of anti-union flyers and letters to the workers at BHM1, arguing that it amounted to modern day union busting.
 "#,
-        "Reuters"
+        "Nicholson, Lucy. “People Protest in Support of the Unionizing Efforts of the Alabama Amazon Workers, in Los Angeles, California, March 22, 2021.” How Amazon Fought the Union Drive in Alabama, CNBC, 16 Apr. 2021, https://www.cnbc.com/2021/04/16/how-amazon-fought-the-union-drive-in-alabama.html."
     );
 
     let art_txt = tombstone(
@@ -47,7 +47,7 @@ Pictured are people in Los Angles protesting against the controversial results o
 r#"
 Depicted is a figure wearing a shirt labelled 'Smalls', referring to labor union leader Chris Smalls, throwing an arrow stylized to be similar to Amazon's logo at a Goliathan figure. The art shows the unionization effort as a strike from the working class against the goliathan giant of Amazon.
 "#,
-        "Cagle Cartoons"
+        "Enos, Randall. “Amazon Labor Union.” Cagle Cartoons, 3 Apr. 2022, https://caglecartoons.com/sku/261682. "
     );
 
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
@@ -680,8 +680,8 @@ Depicted is a figure wearing a shirt labelled 'Smalls', referring to labor union
     commands
         .spawn_bundle(LookTransformBundle {
             transform: LookTransform {
-                eye: Vec3::new(2., 1.25, 1.5),
-            target: Vec3::new(-2., 1.25, 1.5),
+                eye: Vec3::new(2., PLAYER_HEIGHT, 1.5),
+            target: Vec3::new(-2., PLAYER_HEIGHT, 1.5),
             },
             smoother: Smoother::new(0.7),
         })
