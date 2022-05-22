@@ -51,6 +51,7 @@ fn input(
     mut interact_text: Query<(&mut Visibility, &mut Text), With<InteractText>>,
     time: Res<Time>,
     sinks: Res<Assets<AudioSink>>,
+    audio: Res<Audio>,
 ) {
     let sensitivity = 0.1 * time.delta_seconds();
     for (mut camera, mut player, mut smoother) in players.iter_mut() {
@@ -168,16 +169,16 @@ fn input(
                                 camera.target = Vec3::new(4., 1., 6.);
                                 *smoother = Smoother::new(0.);
                             },
-                            InteractableAction::Audio { sink } => {
-                                let sink = sinks.get(sink).unwrap();
-                                match sink.is_paused() {
-                                    true => {
-                                        for (_, other_audio) in sinks.iter() {
-                                            other_audio.pause();
-                                        }
-                                        sink.play()
-                                    },
-                                    false => sink.pause(),
+                            InteractableAction::Audio { source } => {
+                                if let Some((sink, _)) = &player.playing_audio {
+                                    sinks.get(sink).map(|sink| match sink.is_paused() {
+                                        true => sink.play(),
+                                        false => sink.pause(),
+                                    });
+                                } else {
+                                    let sink = audio.play(source.clone());        
+                                    let sink = sinks.get_handle(sink);
+                                    player.playing_audio = Some((sink, source.clone()));
                                 }
                             },
                         }
@@ -185,9 +186,11 @@ fn input(
                         interact_visibility.is_visible = true;
                         interact_text.sections[0].value = match &readable.action {
                             InteractableAction::Tombstone { .. } => "[e] Read",
-                            InteractableAction::Audio { sink } => match sinks.get(sink).unwrap().is_paused() {
-                                true => "[e] Play Audio",
-                                false => "[e] Stop Audio",
+                            InteractableAction::Audio { source } => match player.playing_audio
+                                .as_ref()
+                                .map_or(false, |(sink, src)| src.id == source.id && !sinks.get(sink).unwrap().is_paused()) {
+                                false => "[e] Play Audio",
+                                true => "[e] Pause Audio",
                             },
                         }.to_owned();
                     }
@@ -220,6 +223,8 @@ const PLAYER_HEIGHT: f32 = 1.25;
 struct Player {
     /// Viewed text entity
     viewed_text: Option<Entity>,
+    /// The currently playing audio track
+    playing_audio: Option<(Handle<AudioSink>, Handle<AudioSource>)>,
     
     /// Used to restore state after exiting the read dialogue
     old_eye: Vec3,
@@ -244,12 +249,13 @@ pub struct LineCollider {
 }
 
 /// Action that can be taken when interacting with something
+#[derive(Clone)]
 pub enum InteractableAction {
     Tombstone {
         text: Entity,
     },
     Audio {
-        sink: Handle<AudioSink>,
+        source: Handle<AudioSource>,
     }
 }
 
@@ -286,12 +292,15 @@ pub struct GlobalResources {
     protest_image: Handle<Image>,
     art: Handle<Image>,
     mlk: Handle<Image>,
+    mlk_speech: Handle<AudioSource>,
+    headphones: Handle<Image>,
     job_iden: Handle<Image>,
 }
 
 /// Load all textures and set their repeat mode
 fn load_resources(
     mut images: ResMut<Assets<Image>>,
+    asset_server: Res<AssetServer>,
     mut resources: ResMut<GlobalResources>
 ) {
     let mut load = |buf: &[u8]| {
@@ -332,4 +341,7 @@ fn load_resources(
     resources.protest_image = load(include_bytes!("../assets/protest-image.png"));
     resources.art = load(include_bytes!("../assets/art.png"));
     resources.mlk = load(include_bytes!("../assets/martin-luther-king-jr.png"));
+    resources.headphones = load(include_bytes!("../assets/headphones.png"));
+    
+    resources.mlk_speech = asset_server.load("sound/mlk-speech.mp3");
 }

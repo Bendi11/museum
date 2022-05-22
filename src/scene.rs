@@ -74,7 +74,7 @@ pub struct WallBuilder {
     /// What side to cull, optional
     cull: Option<Face>,
     /// What text to display as a tombstone
-    txt: Option<Entity>,
+    action: Option<InteractableAction>,
 }
 
 /// A rectangle floor
@@ -227,13 +227,13 @@ impl WallBuilder {
             tiles_wide: 1.,
             transparent: false,
             cull: None,
-            txt: None,
+            action: None,
         }
     }
     
     /// Add a text entity to display for this wall when interacted
-    pub fn with_text(mut self, txt: Entity) -> Self {
-        self.txt = Some(txt);
+    pub fn with_action(mut self, action: InteractableAction) -> Self {
+        self.action = Some(action);
         self
     }
     
@@ -357,10 +357,10 @@ impl WallBuilder {
                     len: self.from.distance(self.to),
                 });
         }
-        if let Some(text) = self.txt {
+        if let Some(action) = self.action.clone() {
             command
                 .insert(Interactable {
-                    action: InteractableAction::Tombstone { text },
+                    action,
                     point: (self.from + self.to) / 2.
                 });
         }

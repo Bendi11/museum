@@ -40,7 +40,7 @@ Pictured are people in Los Angles protesting against the controversial results o
     let art_txt = tombstone(
         &mut commands,
         window,
-        font,
+        font.clone(),
         "Amazon Labor Union",
         "April 3, 2022",
         "Randall Enos",
@@ -48,6 +48,19 @@ r#"
 Depicted is a figure wearing a shirt labelled 'Smalls', referring to labor union leader Chris Smalls attacking a Goliathan figure. The upside-down orange arrow holds special significance as a pro-union symbol, representing Amazon's smiley face arrow turned into a frown. This cartoon shows the unionization effort as a strike from the working class against the goliathan giant of Amazon.
 "#,
         "Enos, Randall. “Amazon Labor Union.” Cagle Cartoons, 3 Apr. 2022, https://caglecartoons.com/sku/261682. "
+    );
+
+    let mlk_speech_txt = tombstone(
+        &mut commands,
+        window,
+        font.clone(),
+        "All Labor Has Dignity",
+        "March 18, 1968",
+        "Martin Luther King Jr.",
+r#"
+Martin Luther King Jr. is possibly the most well known civil rights activist in the U.S., however his contributions to the labor movement often go unnoticed. In his "All Labor Has Dignity" speech, he speaks to striking sanitation workers in Memphis, Tennessee protesting dangerous working conditions and poor pay.
+"#,
+        "“The 50th Anniversary of Martin Luther King, Jr.'s ‘All Labor Has Dignity.’” Beacon Broadside: A Project of Beacon Press, 18 Mar. 2018, https://www.beaconbroadside.com/broadside/2018/03/the-50th-anniversary-of-martin-luther-king-jrs-all-labor-has-dignity.html."
     );
 
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
@@ -644,7 +657,7 @@ Depicted is a figure wearing a shirt labelled 'Smalls', referring to labor union
                 .with_height(0.25)
                 .with_offset(WALL_HEIGHT / 2. - 0.75)
                 .with_transparency(false)
-                .with_text(protest_image_txt)
+                .with_action(InteractableAction::Tombstone { text: protest_image_txt})
                 .with_collision(false)
         )
         .with_wall(
@@ -669,9 +682,34 @@ Depicted is a figure wearing a shirt labelled 'Smalls', referring to labor union
                 .with_cull(Face::Front)
                 .with_height(0.25)
                 .with_offset(WALL_HEIGHT / 2. - 0.5)
-                .with_text(art_txt)
+                .with_action(InteractableAction::Tombstone { text: art_txt })
                 .with_collision(false)
                 .with_tiles(-1., 1.)
+        )
+        
+        .with_wall(
+            wall((af.0 + 0.01, af.1 + 0.5), (af.0 + 0.01, af.1 + 4.5))
+                .with_height(2.25)
+                .with_offset(WALL_HEIGHT / 2. - 1.)
+                .with_collision(false)
+                .with_texture(resources.mlk.clone())
+        )
+        .with_wall(
+            wall((af.0 + 0.01, af.1 + 4.8), (af.0 + 0.01, af.1 + 5.3))
+                .with_height(0.25)
+                .with_cull(Face::Back)
+                .with_collision(false)
+                .with_offset(WALL_HEIGHT / 2. - 0.4)
+                .with_action(InteractableAction::Tombstone { text: mlk_speech_txt })
+                .with_texture(resources.tombstone.clone())
+        )
+        .with_wall(
+            wall((al.0 + 3.2, al.1 - 0.1), (al.0 + 3.45, al.1 - 0.1))
+                .with_texture(resources.headphones.clone())
+                .with_transparency(true)
+                .with_height(0.25)
+                .with_offset(WALL_HEIGHT / 2. - 0.75)
+                .with_action(InteractableAction::Audio { source: resources.mlk_speech.clone() })
         )
         
         .finish(&mut commands, &mut meshes, &mut materials);
