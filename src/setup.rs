@@ -89,6 +89,19 @@ Following a strike by air traffic controllers across the nation in response to u
         "Reagan, Ronald. Remarks and Q &amp; A with Reporters on the Air Traffic ... - Youtube. https://www.youtube.com/watch?v=j3ZTCPJ39LA."
     );
 
+    let news_txt = tombstone(
+        &mut commands,
+        window,
+        font.clone(),
+        "Senate Defeats Labor Bill Veto",
+        "June 23, 1947",
+        "Elmira Star-Gazette",
+r#"
+
+"#,
+        ""
+    );
+
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
 
     let a = (0., 0.);
@@ -758,6 +771,16 @@ Following a strike by air traffic controllers across the nation in response to u
                 .with_offset(WALL_HEIGHT / 2. - 0.9)
                 .with_tiles(-1., 1.)
                 .with_action(InteractableAction::Tombstone { text: starbucks_txt })
+        )
+
+        .with_wall(
+            wall((ap.0 + 1., ap.1 - 0.01), (ap.0 + 1.5, ap.1 - 0.01))
+                .with_height(0.25)
+                .with_cull(Face::Back)
+                .with_collision(false)
+                .with_texture(resources.tombstone.clone())
+                .with_offset(WALL_HEIGHT / 2. - 0.7)
+                .with_action(InteractableAction::Tombstone { text: reagan_txt })
         )
         
         .finish(&mut commands, &mut meshes, &mut materials);

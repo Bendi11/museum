@@ -90,13 +90,15 @@ fn input(
             
             if kb.pressed(KeyCode::W) {
                 movement.y += movespeed;
-            } else if kb.pressed(KeyCode::S) {
+            } 
+            if kb.pressed(KeyCode::S) {
                 movement.y -= movespeed;
             }
 
             if kb.pressed(KeyCode::D) {
                 movement.x -= movespeed;
-            } else if kb.pressed(KeyCode::A) {
+            }
+            if kb.pressed(KeyCode::A) {
                 movement.x += movespeed;
             }
             let speed = movement.length();
@@ -203,8 +205,8 @@ fn input(
     for event in mb.iter() {
         if event.button == MouseButton::Left && event.state == ElementState::Released {
             windows.get_primary_mut().map(|window| {
-                window.set_cursor_lock_mode(!window.cursor_locked());
-                window.set_cursor_visibility(!window.cursor_visible());
+                window.set_cursor_lock_mode(true);
+                window.set_cursor_visibility(false);
             });
         }
     }
@@ -216,7 +218,7 @@ pub struct GlobalState {
 }
 
 const PLAYER_RADIUS: f32 = 0.32;
-const PLAYER_HEIGHT: f32 = 1.25;
+const PLAYER_HEIGHT: f32 = 1.6;
 
 /// Marker component specifying that a collision object is controlled with the keyboard and mouse
 #[derive(Component, Default)]
