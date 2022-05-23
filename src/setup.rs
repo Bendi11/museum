@@ -789,8 +789,8 @@ r#"
     commands
         .spawn_bundle(LookTransformBundle {
             transform: LookTransform {
-                eye: Vec3::new(2., PLAYER_HEIGHT, 1.5),
-            target: Vec3::new(-2., PLAYER_HEIGHT, 1.5),
+                eye: Vec3::new(4., PLAYER_HEIGHT, 3.),
+            target: Vec3::new(5., PLAYER_HEIGHT, 0.),
             },
             smoother: Smoother::new(0.7),
         })
