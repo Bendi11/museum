@@ -63,6 +63,32 @@ Martin Luther King Jr. is possibly the most well known civil rights activist in 
         "“The 50th Anniversary of Martin Luther King, Jr.'s ‘All Labor Has Dignity.’” Beacon Broadside: A Project of Beacon Press, 18 Mar. 2018, https://www.beaconbroadside.com/broadside/2018/03/the-50th-anniversary-of-martin-luther-king-jrs-all-labor-has-dignity.html."
     );
 
+    let starbucks_txt = tombstone(
+        &mut commands,
+        window,
+        font.clone(),
+        "Wear Red 4 Ed",
+        "2022",
+        "Union Strong",
+r#"
+A shirt in the style of the popular 'Red 4 Ed' movement. The item shows support for teacher's unions- protesting unlivable wages paid to teachers. The statement 'My Other Job Paid for This Shirt refers to the oft-quoted statistic that 1 in 5 teachers must take another job to support themselves financially.
+"#,
+        "Unionstrongshirts. “Wear Red 4 Ed.” Unionstrongshirts, https://unionstrongshirts.com/products/wear-red-4-ed."
+    );
+
+    let reagan_txt = tombstone(
+        &mut commands,
+        window,
+        font.clone(),
+        "Reagan ATC Strike Interview",
+        "August 3, 1981",
+        "Ronald Reagan",
+r#"
+Following a strike by air traffic controllers across the nation in response to unsafe conditions. The Professional Air Traffic Controllers Organization organized a strike, demanding better pay and post-retirement benefits, as well as a reduced 32-hour work week. Reagan delivered a press conference, declaring PATCO a 'peril to national safety' and ordering their immediate return to work or 'termination'. 
+"#,
+        "Reagan, Ronald. Remarks and Q &amp; A with Reporters on the Air Traffic ... - Youtube. https://www.youtube.com/watch?v=j3ZTCPJ39LA."
+    );
+
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
 
     let a = (0., 0.);
@@ -710,6 +736,28 @@ Martin Luther King Jr. is possibly the most well known civil rights activist in 
                 .with_height(0.25)
                 .with_offset(WALL_HEIGHT / 2. - 0.75)
                 .with_action(InteractableAction::Audio { source: resources.mlk_speech.clone() })
+                .with_cull(Face::Back)
+        )
+
+        .with_wall(
+            wall((z.0 + 0.01, z.1 - 3.), (z.0 + 0.01, z.1 - 3.9))
+                .with_texture(resources.starbucks_shirt.clone())
+                .with_cull(Face::Front)
+                .with_height(1.)
+                .with_offset(WALL_HEIGHT / 2. - 0.5)
+                .with_tiles(-1., 1.)
+                .with_transparency(true)
+                .with_collision(false)
+        )
+        .with_wall(
+            wall((z.0 + 0.01, z.1 - 3.2), (z.0 + 0.01, z.1 - 3.7))
+                .with_height(0.25)
+                .with_cull(Face::Front)
+                .with_collision(false)
+                .with_texture(resources.tombstone.clone())
+                .with_offset(WALL_HEIGHT / 2. - 0.9)
+                .with_tiles(-1., 1.)
+                .with_action(InteractableAction::Tombstone { text: starbucks_txt })
         )
         
         .finish(&mut commands, &mut meshes, &mut materials);
