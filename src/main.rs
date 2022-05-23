@@ -343,5 +343,5 @@ fn load_resources(
     resources.mlk = load(include_bytes!("../assets/martin-luther-king-jr.png"));
     resources.headphones = load(include_bytes!("../assets/headphones.png"));
     
-    resources.mlk_speech = asset_server.load("sound/mlk-speech.mp3");
+    resources.mlk_speech = asset_server.load("sound/mlk-speech.ogg");
 }
