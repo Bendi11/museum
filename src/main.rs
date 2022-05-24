@@ -46,26 +46,34 @@ fn input(
     mut players: Query<(&mut LookTransform, &mut Player, &mut Smoother)>,
     mut windows: ResMut<Windows>,
     objects: Query<&LineCollider>,
-    tombstones: Query<&Interactable, Without<InteractText>>,
-    mut texts: Query<&mut Visibility, Without<InteractText>>,
-    mut interact_text: Query<(&mut Visibility, &mut Text), With<InteractText>>,
+    tombstones: Query<&Interactable, (Without<InteractText>, Without<ExitPrompt>)>,
+    mut texts: Query<&mut Visibility, (Without<InteractText>, Without<ExitPrompt>)>,
+    mut interact_text: Query<(&mut Visibility, &mut Text), (With<InteractText>, Without<ExitPrompt>)>,
     time: Res<Time>,
     sinks: Res<Assets<AudioSink>>,
     audio: Res<Audio>,
+    mut exit_prompt: Query<&mut Visibility, With<ExitPrompt>>,
 ) {
     let sensitivity = 0.1 * time.delta_seconds();
     for (mut camera, mut player, mut smoother) in players.iter_mut() {
-        if let Some(txt) = player.viewed_text { 
+        if let Some(txt) = player.viewed_text {
             if kb.just_released(KeyCode::E) {
+                exit_prompt
+                    .iter_mut()
+                    .for_each(|mut prompt| prompt.is_visible = false);
                 texts.get_mut(txt).unwrap().is_visible = false;
                 player.viewed_text = None;
                 camera.eye = player.old_eye;
                 camera.target = player.old_target;
                 *smoother = Smoother::new(0.7);
+            } else {
+                exit_prompt
+                    .iter_mut()
+                    .for_each(|mut prompt| prompt.is_visible = true);
             }
             break
         }
-        
+
         if let Some(dir) = camera.look_direction() {
             let mut angles = LookAngles::from_vector(dir);
             let yaw_rot = Quat::from_axis_angle(Vec3::Y, angles.get_yaw());
@@ -145,6 +153,8 @@ fn input(
                     player.cam_height -= BOB_SPEED * player.cam_height.signum() * time.delta_seconds();
                 }
             }
+
+            let (mut interact_visibility, mut interact_text) = interact_text.get_single_mut().unwrap();
             
             pos.x = pos2d.x;
             pos.y = PLAYER_HEIGHT + player.cam_height;
@@ -156,7 +166,6 @@ fn input(
             player.old_eye = camera.eye;
             player.old_target = camera.target;
             
-            let (mut interact_visibility, mut interact_text) = interact_text.get_single_mut().unwrap();
             interact_visibility.is_visible = false;
 
             for interactable in tombstones.iter() {
@@ -277,6 +286,8 @@ pub struct Interactable {
 #[derive(Component)]
 pub struct InteractText;
 
+#[derive(Component)]
+pub struct ExitPrompt;
 
 #[derive(Default)]
 pub struct GlobalResources {
@@ -314,6 +325,7 @@ pub struct GlobalResources {
     reagan_audio: Handle<AudioSource>,
     cesar_chavez: Handle<Image>,
     protestors: Handle<Image>,
+    modern_protestors: Handle<Image>,
     works_cited: Handle<Image>,
     job_iden: Handle<Image>,
 }
@@ -375,6 +387,7 @@ fn load_resources(
     resources.other_intro_wall = load(include_bytes!("../assets/other-intro.png"));
     resources.protestors = load(include_bytes!("../assets/protestors.png"));
     resources.works_cited = load(include_bytes!("../assets/works-cited.png"));
+    resources.modern_protestors = load(include_bytes!("../assets/modern-protestors.png"));
     
     resources.mlk_speech = asset_server.load("sound/mlk-speech.ogg");
     resources.reagan_audio = asset_server.load("sound/reagan.ogg");

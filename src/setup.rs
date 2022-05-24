@@ -231,6 +231,14 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
             .with_tiles(-1., 1.)
             .with_cull(Face::Front)
         )
+        .with_wall(
+            wall((c.0 - 1., c.1 + 0.01), (bo.0 + 1., bo.1 + 0.01))
+                .with_texture(resources.modern_protestors.clone())
+                .with_cull(Face::Back)
+                .with_collision(false)
+                .with_height(2.)
+                .with_offset(WALL_HEIGHT / 2. - 1.)
+        )
         .with_wall(wall(d, bp)
             .with_texture(resources.blue_trimmed_wall.clone())
             .with_cull(Face::Front)
@@ -922,7 +930,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
         .spawn_bundle(LookTransformBundle {
             transform: LookTransform {
                 eye: Vec3::new(4., PLAYER_HEIGHT, 3.),
-            target: Vec3::new(0., PLAYER_HEIGHT, 3.),
+                target: Vec3::new(0., PLAYER_HEIGHT, 3.),
             },
             smoother: Smoother::new(0.7),
         })
@@ -936,6 +944,36 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
         .insert(Player::default());
     
     commands.spawn_bundle(UiCameraBundle::default());
+
+    commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                position: Rect {
+                    top: Val::Percent(5.),
+                    left: Val::Percent(5.),
+                    ..default()
+                },
+                ..default()
+            },
+            text: Text::with_section(
+                "[e] Exit",
+                TextStyle {
+                    font: asset_server.load("fonts/times-new-roman.ttf"),
+                    font_size: 24.0,
+                    color: Color::WHITE,
+                },
+                TextAlignment {
+                    vertical: VerticalAlign::Top,
+                    horizontal: HorizontalAlign::Left, 
+                },
+            ),
+            ..default()
+        })
+        .insert(Visibility { is_visible: false })
+        .insert(ExitPrompt);
+
 
     // Text with one section
     commands
