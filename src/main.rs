@@ -296,7 +296,9 @@ pub struct GlobalResources {
     mlk: Handle<Image>,
     mlk_speech: Handle<AudioSource>,
     headphones: Handle<Image>,
-    starbucks_shirt: Handle<Image>,
+    teacher_shirt: Handle<Image>,
+    velvet: Handle<Image>,
+    news: Handle<Image>,
     job_iden: Handle<Image>,
 }
 
@@ -345,7 +347,9 @@ fn load_resources(
     resources.art = load(include_bytes!("../assets/art.png"));
     resources.mlk = load(include_bytes!("../assets/martin-luther-king-jr.png"));
     resources.headphones = load(include_bytes!("../assets/headphones.png"));
-    resources.starbucks_shirt = load(include_bytes!("../assets/starbucks.png"));
+    resources.teacher_shirt = load(include_bytes!("../assets/starbucks.png"));
+    resources.velvet = load(include_bytes!("../assets/velvet.png"));
+    resources.news = load(include_bytes!("../assets/news.png"));
     
     resources.mlk_speech = asset_server.load("sound/mlk-speech.ogg");
 }

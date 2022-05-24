@@ -97,9 +97,9 @@ Following a strike by air traffic controllers across the nation in response to u
         "June 23, 1947",
         "Elmira Star-Gazette",
 r#"
-
+On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley Act following a wave of postwar labor strikes. The act was designed to limit the power of unions to organize strikes and form contractual 'closed shop' agreements with employers requiring the employer to hire union members exlusively. In addition, the executive branch was given the ability to obtain an injuction requiring that a strike be broken if the strike was deemed a threat to national health and safety. Truman vehemently vetoed this act, and labor leaders condemned the act as a 'slave labor bill'.
 "#,
-        ""
+        "Washington (AP). “Overrider Vote Wins 68-25 With Measure Becoming Law.” Elmira Star-Gazette, 23 June 1947, p. 1."
     );
 
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
@@ -190,6 +190,7 @@ r#"
     let cf = (29., 39.5);
 
     const CEILING_OFFSET: f32 = 0.4;
+    const PEDESTAL_HEIGHT: f32 = 1.;
 
     SceneBuilder::new()
         .with_wall(wall(a, f)
@@ -754,7 +755,7 @@ r#"
 
         .with_wall(
             wall((z.0 + 0.01, z.1 - 3.), (z.0 + 0.01, z.1 - 3.9))
-                .with_texture(resources.starbucks_shirt.clone())
+                .with_texture(resources.teacher_shirt.clone())
                 .with_cull(Face::Front)
                 .with_height(1.)
                 .with_offset(WALL_HEIGHT / 2. - 0.5)
@@ -781,6 +782,47 @@ r#"
                 .with_texture(resources.tombstone.clone())
                 .with_offset(WALL_HEIGHT / 2. - 0.7)
                 .with_action(InteractableAction::Tombstone { text: reagan_txt })
+        )
+
+        /* Pedestal for newspaper */
+        .with_wall(
+            wall((10., 29.), (12., 29.))
+                .with_cull(Face::Front)
+                .with_height(PEDESTAL_HEIGHT)
+                .with_texture(resources.velvet.clone())
+        )
+        .with_wall(
+            wall((10., 29.), (10., 27.))
+                .with_cull(Face::Back)
+                .with_height(PEDESTAL_HEIGHT)
+                .with_texture(resources.velvet.clone())
+        )
+        .with_wall(
+            wall((10., 27.), (12., 27.))
+                .with_cull(Face::Back)
+                .with_height(PEDESTAL_HEIGHT)
+                .with_texture(resources.velvet.clone())
+        )
+        .with_wall(
+            wall((12., 27.), (12., 29.))
+                .with_cull(Face::Back)
+                .with_height(PEDESTAL_HEIGHT)
+                .with_texture(resources.velvet.clone())
+        )
+        .with_floor(
+            FloorBuilder::new((10., 29.), (12., 27.))
+                .with_cull(Face::Front)
+                .with_texture(resources.news.clone())
+                .with_offset(PEDESTAL_HEIGHT)
+                .with_tiles(-1., 1.)
+        )
+        .with_wall(
+            wall((10.75, 26.999), (11.25, 26.999))
+                .with_texture(resources.tombstone.clone())
+                .with_offset(PEDESTAL_HEIGHT / 2. + 0.1)
+                .with_height(0.25)
+                .with_cull(Face::Back)
+                .with_action(InteractableAction::Tombstone { text: news_txt })
         )
         
         .finish(&mut commands, &mut meshes, &mut materials);
