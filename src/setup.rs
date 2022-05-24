@@ -63,7 +63,7 @@ Martin Luther King Jr. is possibly the most well known civil rights activist in 
         "“The 50th Anniversary of Martin Luther King, Jr.'s ‘All Labor Has Dignity.’” Beacon Broadside: A Project of Beacon Press, 18 Mar. 2018, https://www.beaconbroadside.com/broadside/2018/03/the-50th-anniversary-of-martin-luther-king-jrs-all-labor-has-dignity.html."
     );
 
-    let starbucks_txt = tombstone(
+    let teacher_txt = tombstone(
         &mut commands,
         window,
         font.clone(),
@@ -206,7 +206,8 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
             .with_cull(Face::Front)
         )
         .with_wall(wall(c, k)
-            .with_texture(resources.blue_trimmed_wall.clone())
+            .with_texture(resources.intro_wall.clone())
+            .with_tiles(-1., 1.)
             .with_cull(Face::Front)
         )
         .with_wall(wall(d, bp)
@@ -435,6 +436,8 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
         )
         .with_wall(wall(au, az)
             .with_height(WALL_HEIGHT - 0.9)
+            .with_texture(resources.josh_exit.clone())
+            .with_tiles(-1., 1.)
         )
         .with_wall(wall(aw, bb)
             .with_height(WALL_HEIGHT - 0.9)
@@ -771,7 +774,7 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
                 .with_texture(resources.tombstone.clone())
                 .with_offset(WALL_HEIGHT / 2. - 0.9)
                 .with_tiles(-1., 1.)
-                .with_action(InteractableAction::Tombstone { text: starbucks_txt })
+                .with_action(InteractableAction::Tombstone { text: teacher_txt })
         )
 
         .with_wall(

@@ -299,6 +299,8 @@ pub struct GlobalResources {
     teacher_shirt: Handle<Image>,
     velvet: Handle<Image>,
     news: Handle<Image>,
+    josh_exit: Handle<Image>,
+    intro_wall: Handle<Image>,
     job_iden: Handle<Image>,
 }
 
@@ -350,6 +352,8 @@ fn load_resources(
     resources.teacher_shirt = load(include_bytes!("../assets/starbucks.png"));
     resources.velvet = load(include_bytes!("../assets/velvet.png"));
     resources.news = load(include_bytes!("../assets/news.png"));
+    resources.josh_exit = load(include_bytes!("../assets/josh-exit.png"));
+    resources.intro_wall = load(include_bytes!("../assets/intro-wall.png"));
     
     resources.mlk_speech = asset_server.load("sound/mlk-speech.ogg");
 }
