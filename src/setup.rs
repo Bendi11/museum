@@ -115,6 +115,116 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
         "“Cesar Chávez Commemorative Committee SFV.” Pueblo y Salud Inc, https://pys.org/cesar-chavez-commemorative-committee/.",
     );
 
+    let readable_style = Style {
+            position_type: PositionType::Absolute,
+            position: Rect {
+                top: Val::Percent(10.),
+                left: Val::Percent(5.),
+                ..default()
+            },
+            align_items: AlignItems::FlexStart,
+            align_content: AlignContent::FlexEnd,
+            flex_wrap: FlexWrap::Wrap,
+            max_size: Size::new(Val::Px(window.width() - (window.width() * 0.2)), Val::Px(window.height())),
+            ..default()
+        };
+
+
+    let intro_txt = commands.spawn_bundle(TextBundle {
+        style: readable_style.clone(),
+        text: Text {
+            sections: vec![
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 24., color: Color::BLACK },
+                    value: include_str!("../assets/txt/intro.txt").to_owned(),
+                } 
+            ],
+            alignment: TextAlignment { vertical: VerticalAlign::Top, horizontal: HorizontalAlign::Left }
+        },
+        ..default()
+    })
+        .insert(Visibility { is_visible: false })
+        .id();
+
+    let cited_txt = commands.spawn_bundle(TextBundle {
+        style: readable_style.clone(),
+        text: Text {
+            sections: vec![
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 16., color: Color::BLACK },
+                    value: include_str!("../assets/txt/cited.txt").to_owned(),
+                } 
+            ],
+            alignment: TextAlignment { vertical: VerticalAlign::Top, horizontal: HorizontalAlign::Left }
+        },
+        ..default()
+    })
+        .insert(Visibility { is_visible: false })
+        .id();
+
+
+    let josh_txt = commands.spawn_bundle(TextBundle {
+        style: readable_style.clone(),
+        text: Text {
+            sections: vec![
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 20., color: Color::BLACK },
+                    value: include_str!("../assets/txt/josh.txt").to_owned(),
+                },
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 12., color: Color::BLACK },
+                    value: include_str!("../assets/txt/josh-cited.txt").to_owned()
+                }
+            ],
+            alignment: TextAlignment { vertical: VerticalAlign::Top, horizontal: HorizontalAlign::Left }
+        },
+        ..default()
+    })
+        .insert(Visibility { is_visible: false})
+        .id();
+
+    let matt_txt = commands.spawn_bundle(TextBundle {
+        style: readable_style.clone(),
+        text: Text {
+            sections: vec![
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 20., color: Color::BLACK },
+                    value: include_str!("../assets/txt/matt.txt").to_owned(),
+                },
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 12., color: Color::BLACK },
+                    value: include_str!("../assets/txt/matt-cited.txt").to_owned()
+                }
+            ],
+            alignment: TextAlignment { vertical: VerticalAlign::Top, horizontal: HorizontalAlign::Left }
+        },
+        ..default()
+    })
+        .insert(Visibility { is_visible: false})
+        .id();
+
+    let ben_txt = commands.spawn_bundle(TextBundle {
+        style: readable_style,
+        text: Text {
+            sections: vec![
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 20., color: Color::BLACK },
+                    value: include_str!("../assets/txt/ben.txt").to_owned(),
+                },
+                TextSection {
+                    style: TextStyle { font: font.clone(), font_size: 12., color: Color::BLACK },
+                    value: include_str!("../assets/txt/ben-cited.txt").to_owned()
+                }
+            ],
+            alignment: TextAlignment { vertical: VerticalAlign::Top, horizontal: HorizontalAlign::Left }
+        },
+        ..default()
+    })
+        .insert(Visibility { is_visible: false})
+        .id();
+
+
+
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
 
     let a = (0., 0.);
@@ -230,6 +340,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
             .with_texture(resources.intro_wall.clone())
             .with_tiles(-1., 1.)
             .with_cull(Face::Front)
+            .with_action(InteractableAction::Tombstone { text: intro_txt, name: "Introduction" })
         )
         .with_wall(
             wall((c.0 - 1., c.1 + 0.01), (bo.0 + 1., bo.1 + 0.01))
@@ -459,13 +570,13 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
         .with_wall(wall(r#as, av)
             .with_height(WALL_HEIGHT - 0.9)
             .with_texture(resources.matt_exit.clone())
-            .with_action(InteractableAction::Tooltip("Matt's Exit Wall"))
+            .with_action(InteractableAction::Tombstone { text: matt_txt, name: "Matt's Exit Wall" })
             .with_tiles(-1., 1.)
             .with_cull(Face::Front)
         )
         .with_wall(wall((r#as.0 + 0.01, r#as.1), (av.0 + 0.01, av.1))
             .with_height(WALL_HEIGHT - 0.9)
-            .with_texture(resources.oak_floor.clone())
+            .with_texture(resources.matt_sources.clone())
             .with_collision(false)
             .with_cull(Face::Back)
         )
@@ -477,12 +588,12 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
             .with_height(WALL_HEIGHT - 0.9)
             .with_texture(resources.josh_exit.clone())
             .with_tiles(-1., 1.)
-            .with_action(InteractableAction::Tooltip("Josh's Exit Wall"))
+            .with_action(InteractableAction::Tombstone { text: josh_txt, name: "Josh's Exit Wall" })
             .with_cull(Face::Front)
         )
         .with_wall(wall((au.0 + 0.01, au.1), (az.0 + 0.01, az.1))
             .with_height(WALL_HEIGHT - 0.9)
-            .with_texture(resources.oak_floor.clone())
+            .with_texture(resources.josh_sources.clone())
             .with_collision(false)
             .with_cull(Face::Back)
         )
@@ -494,9 +605,9 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
         )
         .with_wall(wall((aw.0 + 0.01, aw.1), (bb.0 + 0.01, bb.1))
             .with_height(WALL_HEIGHT - 0.9)
-            .with_texture(resources.oak_floor.clone())
+            .with_texture(resources.ben_sources.clone())
             .with_collision(false)
-            .with_action(InteractableAction::Tooltip("Ben's Exit Wall"))
+            .with_action(InteractableAction::Tombstone { text: ben_txt, name: "Ben's Exit Wall" })
             .with_cull(Face::Back)
         )
         .with_wall(wall(ax, be)
@@ -616,6 +727,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
         )
         .with_wall(wall(ce, bd)
             .with_texture(resources.works_cited.clone())
+            .with_action(InteractableAction::Tombstone { text: cited_txt, name: "Works Cited" })
             .with_cull(Face::Back)
         )
 
@@ -756,7 +868,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
                 .with_height(0.25)
                 .with_offset(WALL_HEIGHT / 2. - 0.75)
                 .with_transparency(false)
-                .with_action(InteractableAction::Tombstone { text: protest_image_txt})
+                .with_action(InteractableAction::Tombstone { text: protest_image_txt, name: "Amazon Protest Image" })
                 .with_collision(false)
         )
         .with_wall(
@@ -781,7 +893,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
                 .with_cull(Face::Front)
                 .with_height(0.25)
                 .with_offset(WALL_HEIGHT / 2. - 0.5)
-                .with_action(InteractableAction::Tombstone { text: art_txt })
+                .with_action(InteractableAction::Tombstone { text: art_txt, name: "Amazon Labor Union"})
                 .with_collision(false)
                 .with_tiles(-1., 1.)
         )
@@ -799,7 +911,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
                 .with_cull(Face::Back)
                 .with_collision(false)
                 .with_offset(WALL_HEIGHT / 2. - 0.4)
-                .with_action(InteractableAction::Tombstone { text: mlk_speech_txt })
+                .with_action(InteractableAction::Tombstone { text: mlk_speech_txt, name: "'All Labor Has Dignity'" })
                 .with_texture(resources.tombstone.clone())
         )
         .with_wall(
@@ -830,7 +942,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
                 .with_texture(resources.tombstone.clone())
                 .with_offset(WALL_HEIGHT / 2. - 0.9)
                 .with_tiles(-1., 1.)
-                .with_action(InteractableAction::Tombstone { text: teacher_txt })
+                .with_action(InteractableAction::Tombstone { text: teacher_txt, name: "Red 4 Ed Shirt" })
         )
 
         .with_wall(
@@ -840,7 +952,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
                 .with_collision(false)
                 .with_texture(resources.tombstone.clone())
                 .with_offset(WALL_HEIGHT / 2. - 0.7)
-                .with_action(InteractableAction::Tombstone { text: reagan_txt })
+                .with_action(InteractableAction::Tombstone { text: reagan_txt, name: "Reagan's Remarks on ATC Strikes" })
         )
         .with_wall(
             wall((ai.0 - 0.01, ai.1 + 2.), (ai.0 - 0.01, ai.1 + 5.))
@@ -901,7 +1013,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
                 .with_offset(PEDESTAL_HEIGHT / 2. + 0.1)
                 .with_height(0.25)
                 .with_cull(Face::Back)
-                .with_action(InteractableAction::Tombstone { text: news_txt })
+                .with_action(InteractableAction::Tombstone { text: news_txt, name: "Star Gazette Newspaper" })
                 .with_collision(false)
         )
 
@@ -920,7 +1032,7 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
                 .with_offset(WALL_HEIGHT / 2. - 0.25)
                 .with_cull(Face::Back)
                 .with_collision(false)
-                .with_action(InteractableAction::Tombstone { text: delano_txt })
+                .with_action(InteractableAction::Tombstone { text: delano_txt, name: "Cesar Chavez Mural" })
         )
          
         .finish(&mut commands, &mut meshes, &mut materials);

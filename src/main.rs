@@ -172,7 +172,7 @@ fn input(
                 if interactable.point.distance(pos2d) < interactable.radius {
                     if kb.just_released(KeyCode::E) {
                         match &interactable.action {
-                            InteractableAction::Tombstone { text } => {
+                            InteractableAction::Tombstone { text, .. } => {
                                 texts.get_mut(*text).unwrap().is_visible = true; 
                                 player.viewed_text = Some(*text);
                                 camera.eye = Vec3::new(4., 1., 5.5);
@@ -199,15 +199,15 @@ fn input(
                     } else {
                         interact_visibility.is_visible = true;
                         interact_text.sections[0].value = match &interactable.action {
-                            InteractableAction::Tombstone { .. } => "[e] Read",
+                            InteractableAction::Tombstone { name, .. } => format!("[e] Read {}", name),
                             InteractableAction::Audio { source } => match player.playing_audio
                                 .as_ref()
                                 .map_or(false, |(sink, src)| src.id == source.id && !sinks.get(sink).unwrap().is_paused()) {
                                 false => "[e] Play Audio",
                                 true => "[e] Pause Audio",
-                            },
-                            InteractableAction::Tooltip(tip) => tip,
-                        }.to_owned();
+                            }.to_owned(),
+                            InteractableAction::Tooltip(tip) => tip.to_string(),
+                        };
                     }
                     break;
                 }
@@ -268,6 +268,7 @@ pub struct LineCollider {
 pub enum InteractableAction {
     Tombstone {
         text: Entity,
+        name: &'static str,
     },
     Audio {
         source: Handle<AudioSource>,
@@ -319,6 +320,9 @@ pub struct GlobalResources {
     josh_exit: Handle<Image>,
     matt_exit: Handle<Image>,
     ben_exit: Handle<Image>,
+    josh_sources: Handle<Image>,
+    matt_sources: Handle<Image>,
+    ben_sources: Handle<Image>,
     intro_wall: Handle<Image>,
     other_intro_wall: Handle<Image>,
     reagan: Handle<Image>,
@@ -388,6 +392,9 @@ fn load_resources(
     resources.protestors = load(include_bytes!("../assets/protestors.png"));
     resources.works_cited = load(include_bytes!("../assets/works-cited.png"));
     resources.modern_protestors = load(include_bytes!("../assets/modern-protestors.png"));
+    resources.josh_sources = load(include_bytes!("../assets/josh-exit-sources.png"));
+    resources.matt_sources = load(include_bytes!("../assets/matt-exit-sources.png"));
+    resources.ben_sources = load(include_bytes!("../assets/ben-exit-sources.png"));
     
     resources.mlk_speech = asset_server.load("sound/mlk-speech.ogg");
     resources.reagan_audio = asset_server.load("sound/reagan.ogg");
