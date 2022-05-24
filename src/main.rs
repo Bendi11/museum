@@ -172,16 +172,19 @@ fn input(
                                 *smoother = Smoother::new(0.);
                             },
                             InteractableAction::Audio { source } => {
-                                if let Some((sink, _)) = &player.playing_audio {
-                                    sinks.get(sink).map(|sink| match sink.is_paused() {
-                                        true => sink.play(),
-                                        false => sink.pause(),
-                                    });
-                                } else {
-                                    let sink = audio.play(source.clone());        
-                                    let sink = sinks.get_handle(sink);
-                                    player.playing_audio = Some((sink, source.clone()));
+                                if let Some((sink, playing_source)) = &player.playing_audio {
+                                    if playing_source == source {
+                                        sinks.get(sink).map(|sink| match sink.is_paused() {
+                                            true => sink.play(),
+                                            false => sink.pause(),
+                                        });
+                                        break;
+                                    }
+                                    sinks.get(sink).map(AudioSink::stop);
                                 }
+                                let sink = audio.play(source.clone());        
+                                let sink = sinks.get_handle(sink);
+                                player.playing_audio = Some((sink, source.clone()));
                             },
                         }
                     } else {
@@ -301,6 +304,8 @@ pub struct GlobalResources {
     news: Handle<Image>,
     josh_exit: Handle<Image>,
     intro_wall: Handle<Image>,
+    reagan: Handle<Image>,
+    reagan_audio: Handle<AudioSource>,
     job_iden: Handle<Image>,
 }
 
@@ -354,6 +359,8 @@ fn load_resources(
     resources.news = load(include_bytes!("../assets/news.png"));
     resources.josh_exit = load(include_bytes!("../assets/josh-exit.png"));
     resources.intro_wall = load(include_bytes!("../assets/intro-wall.png"));
+    resources.reagan = load(include_bytes!("../assets/reagan.png"));
     
     resources.mlk_speech = asset_server.load("sound/mlk-speech.ogg");
+    resources.reagan_audio = asset_server.load("sound/reagan.ogg");
 }

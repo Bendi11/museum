@@ -747,11 +747,11 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
                 .with_texture(resources.tombstone.clone())
         )
         .with_wall(
-            wall((al.0 + 3.2, al.1 - 0.1), (al.0 + 3.45, al.1 - 0.1))
+            wall((al.0 + 3.2, al.1 - 0.1), (al.0 + 3.70, al.1 - 0.1))
                 .with_texture(resources.headphones.clone())
                 .with_transparency(true)
-                .with_height(0.25)
-                .with_offset(WALL_HEIGHT / 2. - 0.75)
+                .with_height(0.5)
+                .with_offset(WALL_HEIGHT / 2. - 0.25)
                 .with_action(InteractableAction::Audio { source: resources.mlk_speech.clone() })
                 .with_cull(Face::Back)
         )
@@ -785,6 +785,25 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
                 .with_texture(resources.tombstone.clone())
                 .with_offset(WALL_HEIGHT / 2. - 0.7)
                 .with_action(InteractableAction::Tombstone { text: reagan_txt })
+        )
+        .with_wall(
+            wall((ai.0 - 0.01, ai.1 + 2.), (ai.0 - 0.01, ai.1 + 5.))
+                .with_height(2.0625)
+                .with_texture(resources.reagan.clone())
+                .with_collision(false)
+                .with_tiles(-1., 1.)
+                .with_cull(Face::Front)
+                .with_offset(WALL_HEIGHT / 2. - 1.03)
+        )
+        .with_wall(
+            wall((ai.0 - 4., ai.1 + 0.01), (ai.0 - 3.5, ai.1 + 0.01))
+                .with_texture(resources.headphones.clone())
+                .with_height(0.5)
+                .with_collision(false)
+                .with_action(InteractableAction::Audio { source: resources.reagan_audio.clone() })
+                .with_cull(Face::Front)
+                .with_offset(WALL_HEIGHT / 2. - 0.25)
+                .with_transparency(true)
         )
 
         /* Pedestal for newspaper */
@@ -826,6 +845,7 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
                 .with_height(0.25)
                 .with_cull(Face::Back)
                 .with_action(InteractableAction::Tombstone { text: news_txt })
+                .with_collision(false)
         )
         
         .finish(&mut commands, &mut meshes, &mut materials);
