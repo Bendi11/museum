@@ -159,11 +159,10 @@ fn input(
             let (mut interact_visibility, mut interact_text) = interact_text.get_single_mut().unwrap();
             interact_visibility.is_visible = false;
 
-            const INTERACT_RADIUS: f32 = 2.5;
-            for readable in tombstones.iter() {
-                if readable.point.distance(pos2d) < INTERACT_RADIUS {
+            for interactable in tombstones.iter() {
+                if interactable.point.distance(pos2d) < interactable.radius {
                     if kb.just_released(KeyCode::E) {
-                        match &readable.action {
+                        match &interactable.action {
                             InteractableAction::Tombstone { text } => {
                                 texts.get_mut(*text).unwrap().is_visible = true; 
                                 player.viewed_text = Some(*text);
@@ -186,10 +185,11 @@ fn input(
                                 let sink = sinks.get_handle(sink);
                                 player.playing_audio = Some((sink, source.clone()));
                             },
+                            _ => (),
                         }
                     } else {
                         interact_visibility.is_visible = true;
-                        interact_text.sections[0].value = match &readable.action {
+                        interact_text.sections[0].value = match &interactable.action {
                             InteractableAction::Tombstone { .. } => "[e] Read",
                             InteractableAction::Audio { source } => match player.playing_audio
                                 .as_ref()
@@ -197,6 +197,7 @@ fn input(
                                 false => "[e] Play Audio",
                                 true => "[e] Pause Audio",
                             },
+                            InteractableAction::Tooltip(tip) => tip,
                         }.to_owned();
                     }
                     break;
@@ -261,13 +262,15 @@ pub enum InteractableAction {
     },
     Audio {
         source: Handle<AudioSource>,
-    }
+    },
+    Tooltip(&'static str),
 }
 
 /// Any interactable object
 #[derive(Component)]
 pub struct Interactable {
     pub point: Vec2,
+    pub radius: f32,
     pub action: InteractableAction,
 }
 
@@ -303,9 +306,15 @@ pub struct GlobalResources {
     velvet: Handle<Image>,
     news: Handle<Image>,
     josh_exit: Handle<Image>,
+    matt_exit: Handle<Image>,
+    ben_exit: Handle<Image>,
     intro_wall: Handle<Image>,
+    other_intro_wall: Handle<Image>,
     reagan: Handle<Image>,
     reagan_audio: Handle<AudioSource>,
+    cesar_chavez: Handle<Image>,
+    protestors: Handle<Image>,
+    works_cited: Handle<Image>,
     job_iden: Handle<Image>,
 }
 
@@ -358,8 +367,14 @@ fn load_resources(
     resources.velvet = load(include_bytes!("../assets/velvet.png"));
     resources.news = load(include_bytes!("../assets/news.png"));
     resources.josh_exit = load(include_bytes!("../assets/josh-exit.png"));
+    resources.matt_exit = load(include_bytes!("../assets/matt-exit.png"));
+    resources.ben_exit = load(include_bytes!("../assets/ben-exit.png"));
     resources.intro_wall = load(include_bytes!("../assets/intro-wall.png"));
     resources.reagan = load(include_bytes!("../assets/reagan.png"));
+    resources.cesar_chavez = load(include_bytes!("../assets/cesar.png"));
+    resources.other_intro_wall = load(include_bytes!("../assets/other-intro.png"));
+    resources.protestors = load(include_bytes!("../assets/protestors.png"));
+    resources.works_cited = load(include_bytes!("../assets/works-cited.png"));
     
     resources.mlk_speech = asset_server.load("sound/mlk-speech.ogg");
     resources.reagan_audio = asset_server.load("sound/reagan.ogg");

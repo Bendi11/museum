@@ -75,6 +75,8 @@ pub struct WallBuilder {
     cull: Option<Face>,
     /// What text to display as a tombstone
     action: Option<InteractableAction>,
+    /// What radius for the interactable action
+    radius: f32,
 }
 
 /// A rectangle floor
@@ -228,6 +230,7 @@ impl WallBuilder {
             transparent: false,
             cull: None,
             action: None,
+            radius: 2.5,
         }
     }
     
@@ -303,6 +306,12 @@ impl WallBuilder {
         self.transparent = transparency;
         self
     }
+    
+    /// Set the interaction radius of this wall
+    pub fn with_radius(mut self, radius: f32) -> Self {
+        self.radius = radius;
+        self
+    }
 
     /// Add the wall to the scene
     pub fn build<'w, 's, 'a>(
@@ -361,7 +370,8 @@ impl WallBuilder {
             command
                 .insert(Interactable {
                     action,
-                    point: (self.from + self.to) / 2.
+                    point: (self.from + self.to) / 2.,
+                    radius: self.radius,
                 });
         }
 

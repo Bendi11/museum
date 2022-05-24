@@ -102,6 +102,19 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
         "Washington (AP). “Overrider Vote Wins 68-25 With Measure Becoming Law.” Elmira Star-Gazette, 23 June 1947, p. 1."
     );
 
+    let delano_txt = tombstone(
+        &mut commands,
+        window,
+        font.clone(),
+        "Cesar Chávez Commemorative Committee SFV",
+        "October 22, 2004",
+        "Cesar Chavez Commemorative Committee San Fernando Valley",
+r#"
+Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement. On September 8, 1965, the organization Chavez helped in forming- the National Farm Workers Association; aided Filipino and Mexican immigrant workers in a 5 year long strike known as the Delano Grape Strike. Despite facing cruel violence from the growers, workers boycotted non-union grapes and individuals began to take notice and purchase grapes only from unionized farms. Chavez went on a hunger strike as violent threats began to emerge around the third year of the strike, drawing praise from other important figures like Martin Luther King Jr., and Senator Robert F. Kennedy personally travelled to California to break Cesar's fast together. 
+"#,
+        "“Cesar Chávez Commemorative Committee SFV.” Pueblo y Salud Inc, https://pys.org/cesar-chavez-commemorative-committee/.",
+    );
+
     let wall = |p1: (f32, f32), p2: (f32, f32)| WallBuilder::new(p1, p2);
 
     let a = (0., 0.);
@@ -194,8 +207,16 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
 
     SceneBuilder::new()
         .with_wall(wall(a, f)
-            .with_texture(resources.blue_trimmed_wall.clone())
+            .with_texture(resources.other_intro_wall.clone())
             .with_cull(Face::Back)
+        )
+        .with_wall(wall((a.0 + 2., a.1 + 0.01), (b.0 - 2., b.1 + 0.01))
+            .with_texture(resources.protestors.clone())
+            .with_cull(Face::Front)
+            .with_collision(false)
+            .with_offset(WALL_HEIGHT / 2. - 0.7)
+            .with_height(1.5)
+            .with_tiles(-1., 1.)
         )
         .with_wall(wall(a, c)
             .with_texture(resources.blue_trimmed_wall.clone())
@@ -429,6 +450,16 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
         )
         .with_wall(wall(r#as, av)
             .with_height(WALL_HEIGHT - 0.9)
+            .with_texture(resources.matt_exit.clone())
+            .with_action(InteractableAction::Tooltip("Matt's Exit Wall"))
+            .with_tiles(-1., 1.)
+            .with_cull(Face::Front)
+        )
+        .with_wall(wall((r#as.0 + 0.01, r#as.1), (av.0 + 0.01, av.1))
+            .with_height(WALL_HEIGHT - 0.9)
+            .with_texture(resources.oak_floor.clone())
+            .with_collision(false)
+            .with_cull(Face::Back)
         )
         .with_wall(wall(at, ax)
             .with_texture(resources.eggshell_wall.clone())
@@ -438,9 +469,27 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
             .with_height(WALL_HEIGHT - 0.9)
             .with_texture(resources.josh_exit.clone())
             .with_tiles(-1., 1.)
+            .with_action(InteractableAction::Tooltip("Josh's Exit Wall"))
+            .with_cull(Face::Front)
+        )
+        .with_wall(wall((au.0 + 0.01, au.1), (az.0 + 0.01, az.1))
+            .with_height(WALL_HEIGHT - 0.9)
+            .with_texture(resources.oak_floor.clone())
+            .with_collision(false)
+            .with_cull(Face::Back)
         )
         .with_wall(wall(aw, bb)
             .with_height(WALL_HEIGHT - 0.9)
+            .with_texture(resources.ben_exit.clone())
+            .with_tiles(-1., 1.)
+            .with_cull(Face::Front)
+        )
+        .with_wall(wall((aw.0 + 0.01, aw.1), (bb.0 + 0.01, bb.1))
+            .with_height(WALL_HEIGHT - 0.9)
+            .with_texture(resources.oak_floor.clone())
+            .with_collision(false)
+            .with_action(InteractableAction::Tooltip("Ben's Exit Wall"))
+            .with_cull(Face::Back)
         )
         .with_wall(wall(ax, be)
             .with_texture(resources.red_trimmed_wall.clone())
@@ -558,8 +607,7 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
             .with_cull(Face::Front)
         )
         .with_wall(wall(ce, bd)
-            .with_texture(resources.red_trimmed_wall.clone())
-            .autotile_len()
+            .with_texture(resources.works_cited.clone())
             .with_cull(Face::Back)
         )
 
@@ -804,6 +852,7 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
                 .with_cull(Face::Front)
                 .with_offset(WALL_HEIGHT / 2. - 0.25)
                 .with_transparency(true)
+                .with_radius(1.3)
         )
 
         /* Pedestal for newspaper */
@@ -847,7 +896,25 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
                 .with_action(InteractableAction::Tombstone { text: news_txt })
                 .with_collision(false)
         )
-        
+
+        .with_wall(
+            wall((ae.0 - 0.01, ae.1 - 2.), (ae.0 - 0.01, ae.1 - 5.))
+                .with_texture(resources.cesar_chavez.clone())
+                .with_height(2.25)
+                .with_offset(WALL_HEIGHT / 2. - 0.7)
+                .with_cull(Face::Back)
+                .with_collision(false)
+        )
+        .with_wall(
+            wall((ae.0 - 0.01, ae.1 - 5.5), (ae.0 - 0.01, ae.1 - 6.))
+                .with_texture(resources.tombstone.clone())
+                .with_height(0.25)
+                .with_offset(WALL_HEIGHT / 2. - 0.25)
+                .with_cull(Face::Back)
+                .with_collision(false)
+                .with_action(InteractableAction::Tombstone { text: delano_txt })
+        )
+         
         .finish(&mut commands, &mut meshes, &mut materials);
     
     //Spawn the player
@@ -855,7 +922,7 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
         .spawn_bundle(LookTransformBundle {
             transform: LookTransform {
                 eye: Vec3::new(4., PLAYER_HEIGHT, 3.),
-            target: Vec3::new(5., PLAYER_HEIGHT, 0.),
+            target: Vec3::new(0., PLAYER_HEIGHT, 3.),
             },
             smoother: Smoother::new(0.7),
         })
