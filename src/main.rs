@@ -5,7 +5,7 @@ use bevy::{
     ecs::system::EntityCommands,
     input::{
         mouse::{MouseButtonInput, MouseMotion},
-        ElementState,
+        ElementState, keyboard::KeyboardInput,
     },
     prelude::*,
     render::{
@@ -32,10 +32,22 @@ fn main() {
         .add_startup_system(load_resources.before(setup::setup))
         .add_startup_system(setup::setup)
         .add_system(input)
+        .add_system(grab.before(bevy::input::keyboard::keyboard_input_system))
         .add_system(setup::set_text_sizes)
         .run();
 }
 
+fn grab(
+    keys: EventReader<KeyboardInput>,
+    mut windows: ResMut<Windows>
+) {
+    if !keys.is_empty() {
+        windows.get_primary_mut().map(|win| {
+            win.set_cursor_lock_mode(true);
+            win.set_cursor_visibility(false);
+        });
+    }
+}
 
 /// System running every update used to update the player position and camera angles, as well as 
 /// check if the player is aiming at something that is interactable
@@ -155,7 +167,8 @@ fn input(
             }
 
             let (mut interact_visibility, mut interact_text) = interact_text.get_single_mut().unwrap();
-            
+            interact_visibility.is_visible = false;
+
             pos.x = pos2d.x;
             pos.y = PLAYER_HEIGHT + player.cam_height;
             pos.z = pos2d.y;
@@ -165,8 +178,6 @@ fn input(
             camera.target = camera.eye + camera.radius() * angles.unit_vector();
             player.old_eye = camera.eye;
             player.old_target = camera.target;
-            
-            interact_visibility.is_visible = false;
 
             for interactable in tombstones.iter() {
                 if interactable.point.distance(pos2d) < interactable.radius {
@@ -357,44 +368,44 @@ fn load_resources(
         images.add(image)
     };
 
-    resources.birch_floor = load(include_bytes!("../assets/birch-floor.png"));
-    resources.blue_trimmed_wall = load(include_bytes!("../assets/blue-trimmed-wall.png"));
-    resources.red_trimmed_wall = load(include_bytes!("../assets/red-trimmed-wall.png"));
-    resources.ceiling_panel = load(include_bytes!("../assets/ceiling-panel.png"));
-    resources.sky = load(include_bytes!("../assets/sky.png"));
-    resources.flagstone_floor = load(include_bytes!("../assets/flagstone-floor.png"));
-    resources.limestone_wall = load(include_bytes!("../assets/limestone-wall.png"));
-    resources.wood_slat_roof = load(include_bytes!("../assets/wood-slat-roof.png"));
-    resources.eggshell_wall = load(include_bytes!("../assets/eggshell-wall.png"));
-    resources.linoleum_floor = load(include_bytes!("../assets/linoleum-floor.png"));
-    resources.concrete = load(include_bytes!("../assets/concrete.png"));
-    resources.oak_floor = load(include_bytes!("../assets/oak-floor.png"));
-    resources.tile_floor = load(include_bytes!("../assets/tile-floor.png"));
-    resources.green_trimmed_wall = load(include_bytes!("../assets/green-trimmed-wall.png"));
-    resources.red_tile_floor = load(include_bytes!("../assets/red-tile-floor.png"));
+    resources.birch_floor = load(include_bytes!("../ct-assets/birch-floor.png"));
+    resources.blue_trimmed_wall = load(include_bytes!("../ct-assets/blue-trimmed-wall.png"));
+    resources.red_trimmed_wall = load(include_bytes!("../ct-assets/red-trimmed-wall.png"));
+    resources.ceiling_panel = load(include_bytes!("../ct-assets/ceiling-panel.png"));
+    resources.sky = load(include_bytes!("../ct-assets/sky.png"));
+    resources.flagstone_floor = load(include_bytes!("../ct-assets/flagstone-floor.png"));
+    resources.limestone_wall = load(include_bytes!("../ct-assets/limestone-wall.png"));
+    resources.wood_slat_roof = load(include_bytes!("../ct-assets/wood-slat-roof.png"));
+    resources.eggshell_wall = load(include_bytes!("../ct-assets/eggshell-wall.png"));
+    resources.linoleum_floor = load(include_bytes!("../ct-assets/linoleum-floor.png"));
+    resources.concrete = load(include_bytes!("../ct-assets/concrete.png"));
+    resources.oak_floor = load(include_bytes!("../ct-assets/oak-floor.png"));
+    resources.tile_floor = load(include_bytes!("../ct-assets/tile-floor.png"));
+    resources.green_trimmed_wall = load(include_bytes!("../ct-assets/green-trimmed-wall.png"));
+    resources.red_tile_floor = load(include_bytes!("../ct-assets/red-tile-floor.png"));
     //resources.job_iden = load(include_bytes!("../assets/job-iden.png"));
-    resources.barrier = load(include_bytes!("../assets/barrier.png"));
-    resources.tombstone = load(include_bytes!("../assets/tombstone.png"));
-    resources.protest_image = load(include_bytes!("../assets/protest-image.png"));
-    resources.art = load(include_bytes!("../assets/art.png"));
-    resources.mlk = load(include_bytes!("../assets/martin-luther-king-jr.png"));
-    resources.headphones = load(include_bytes!("../assets/headphones.png"));
-    resources.teacher_shirt = load(include_bytes!("../assets/starbucks.png"));
-    resources.velvet = load(include_bytes!("../assets/velvet.png"));
-    resources.news = load(include_bytes!("../assets/news.png"));
-    resources.josh_exit = load(include_bytes!("../assets/josh-exit.png"));
-    resources.matt_exit = load(include_bytes!("../assets/matt-exit.png"));
-    resources.ben_exit = load(include_bytes!("../assets/ben-exit.png"));
-    resources.intro_wall = load(include_bytes!("../assets/intro-wall.png"));
-    resources.reagan = load(include_bytes!("../assets/reagan.png"));
-    resources.cesar_chavez = load(include_bytes!("../assets/cesar.png"));
-    resources.other_intro_wall = load(include_bytes!("../assets/other-intro.png"));
-    resources.protestors = load(include_bytes!("../assets/protestors.png"));
-    resources.works_cited = load(include_bytes!("../assets/works-cited.png"));
-    resources.modern_protestors = load(include_bytes!("../assets/modern-protestors.png"));
-    resources.josh_sources = load(include_bytes!("../assets/josh-exit-sources.png"));
-    resources.matt_sources = load(include_bytes!("../assets/matt-exit-sources.png"));
-    resources.ben_sources = load(include_bytes!("../assets/ben-exit-sources.png"));
+    resources.barrier = load(include_bytes!("../ct-assets/barrier.png"));
+    resources.tombstone = load(include_bytes!("../ct-assets/tombstone.png"));
+    resources.protest_image = load(include_bytes!("../ct-assets/protest-image.png"));
+    resources.art = load(include_bytes!("../ct-assets/art.png"));
+    resources.mlk = load(include_bytes!("../ct-assets/martin-luther-king-jr.png"));
+    resources.headphones = load(include_bytes!("../ct-assets/headphones.png"));
+    resources.teacher_shirt = load(include_bytes!("../ct-assets/starbucks.png"));
+    resources.velvet = load(include_bytes!("../ct-assets/velvet.png"));
+    resources.news = load(include_bytes!("../ct-assets/news.png"));
+    resources.josh_exit = load(include_bytes!("../ct-assets/josh-exit.png"));
+    resources.matt_exit = load(include_bytes!("../ct-assets/matt-exit.png"));
+    resources.ben_exit = load(include_bytes!("../ct-assets/ben-exit.png"));
+    resources.intro_wall = load(include_bytes!("../ct-assets/intro-wall.png"));
+    resources.reagan = load(include_bytes!("../ct-assets/reagan.png"));
+    resources.cesar_chavez = load(include_bytes!("../ct-assets/cesar.png"));
+    resources.other_intro_wall = load(include_bytes!("../ct-assets/other-intro.png"));
+    resources.protestors = load(include_bytes!("../ct-assets/protestors.png"));
+    resources.works_cited = load(include_bytes!("../ct-assets/works-cited.png"));
+    resources.modern_protestors = load(include_bytes!("../ct-assets/modern-protestors.png"));
+    resources.josh_sources = load(include_bytes!("../ct-assets/josh-exit-sources.png"));
+    resources.matt_sources = load(include_bytes!("../ct-assets/matt-exit-sources.png"));
+    resources.ben_sources = load(include_bytes!("../ct-assets/ben-exit-sources.png"));
     
     resources.mlk_speech = asset_server.load("sound/mlk-speech.ogg");
     resources.reagan_audio = asset_server.load("sound/reagan.ogg");
