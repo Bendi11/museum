@@ -106,7 +106,7 @@ On June 23, 1947 Congress overrode president Truman's veto of the Taft-Hartley A
         &mut commands,
         window,
         font.clone(),
-        "Cesar Chávez Commemorative Committee SFV",
+        "Cesar Chávez Mural",
         "October 22, 2004",
         "Cesar Chavez Commemorative Committee San Fernando Valley",
 r#"
@@ -854,12 +854,12 @@ Pictured in this mural is Cesar Chavez, a prominent leader in the labor movement
                 .with_cull(Face::Front)
         )
 
-        .with_wall(
+        /*.with_wall(
             wall((bj.0 - 0.5, bj.1), (bj.0, bj.1 - 0.5))
             .with_texture(resources.job_iden.clone())
             .with_height(2.1)
             .with_transparency(true)
-        )
+        )*/
     
         .with_wall(
             wall((g.0 + 0.01, g.1 + 2.5), (g.0 + 0.01, g.1 + 3.))

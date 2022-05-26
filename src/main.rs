@@ -93,7 +93,7 @@ fn input(
                 angles.set_yaw(0.01);
             }
 
-            let movespeed = 5.5 * time.delta_seconds();
+            let movespeed = 0.17;//5.5 * 0.2;//time.delta_seconds();
             let mut movement = Vec2::default();
             
             if kb.pressed(KeyCode::W) {
@@ -230,7 +230,7 @@ pub struct GlobalState {
     pub interact_text: Entity,
 }
 
-const PLAYER_RADIUS: f32 = 0.32;
+const PLAYER_RADIUS: f32 = 0.5;
 const PLAYER_HEIGHT: f32 = 1.6;
 
 /// Marker component specifying that a collision object is controlled with the keyboard and mouse
@@ -331,7 +331,7 @@ pub struct GlobalResources {
     protestors: Handle<Image>,
     modern_protestors: Handle<Image>,
     works_cited: Handle<Image>,
-    job_iden: Handle<Image>,
+    //job_iden: Handle<Image>,
 }
 
 /// Load all textures and set their repeat mode
@@ -372,7 +372,7 @@ fn load_resources(
     resources.tile_floor = load(include_bytes!("../assets/tile-floor.png"));
     resources.green_trimmed_wall = load(include_bytes!("../assets/green-trimmed-wall.png"));
     resources.red_tile_floor = load(include_bytes!("../assets/red-tile-floor.png"));
-    resources.job_iden = load(include_bytes!("../assets/job-iden.png"));
+    //resources.job_iden = load(include_bytes!("../assets/job-iden.png"));
     resources.barrier = load(include_bytes!("../assets/barrier.png"));
     resources.tombstone = load(include_bytes!("../assets/tombstone.png"));
     resources.protest_image = load(include_bytes!("../assets/protest-image.png"));
